@@ -6,8 +6,7 @@ export type TOperator =
   | 'MULTIPLY'
   | 'DIVIDE'
   | 'AND'
-  | 'OR'
-  | 'DOT';
+  | 'OR';
 
 export interface TNode {
   type: string;

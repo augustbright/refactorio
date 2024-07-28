@@ -1,4 +1,5 @@
 import { TCommonNode, TOperator } from 'src/types/ast';
+import { AssertTrue, Equals } from 'src/types/utils';
 
 const OPERATOR_VIEW: Record<TOperator, string> = {
   PLUS: '+',
@@ -8,8 +9,7 @@ const OPERATOR_VIEW: Record<TOperator, string> = {
   EQUALITY: '==',
   UNEQUALITY: '!=',
   AND: 'AND',
-  OR: 'OR',
-  DOT: '.'
+  OR: 'OR'
 };
 
 export const prettyText = (node: TCommonNode, level: number): string => {
@@ -54,6 +54,7 @@ export const prettyText = (node: TCommonNode, level: number): string => {
     case 'ReplaceStatement':
       return `REPLACE ${prettyText(node.selector, level)} WITH ${prettyText(node.newValue, level)}${node.andStatement ? ' AND ' + prettyText(node.andStatement, level) : ''}${node.orStatement ? ' OR ' + prettyText(node.orStatement, level) : ''}`;
     default:
+      true as AssertTrue<Equals<typeof node, never>>;
       //@ts-expect-error type of node should be never by default
       return `<UNKNOWN NODE: ${node.type}>`;
   }
