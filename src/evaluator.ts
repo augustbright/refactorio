@@ -1,6 +1,7 @@
 import { readFile } from 'fs/promises';
 import { GlobOptionsWithFileTypesUnset, glob } from 'glob';
 import { Options as RecastOptions } from 'recast';
+import { Readable, Stream } from 'stream';
 
 import {
   TBinaryExpression,
@@ -14,6 +15,7 @@ type TTransformOptions = {
   filename: string;
   program: TProgram;
   evaluationOptions: TEvaluationOptions;
+  stdout: Readable;
 };
 
 type TTransformResult = {
@@ -23,12 +25,20 @@ type TTransformResult = {
 
 const transform = async ({
   program,
-  filename
+  filename,
+  stdout
 }: TTransformOptions): Promise<TTransformResult> => {
   const content = await readFile(filename, 'utf8');
   // const fileAst = parse(content, { parser: evaluationOptions.parser });
   // const changed = false;
-  const globals: Record<string, unknown> = {} as const;
+  const globals: Record<string, unknown> = {
+    print: (text: string) => {
+      stdout.push(text);
+    },
+    context: {
+      filename
+    }
+  } as const;
   const declarations: Record<string, unknown> = {};
 
   const declare = ({ name, value }: { name: string; value: unknown }) => {
@@ -209,18 +219,24 @@ type TEvaluationOptions = {
 
 type TEvaluationResult = {
   files: string[];
+  stdout: Readable;
 };
 
 export const evaluate = async (
   program: TProgram,
   options: TEvaluationOptions
 ): Promise<TEvaluationResult> => {
+  const stdout = new Stream.Readable({
+    read: () => {}
+  });
+
   const files = await glob(options.input.files, {
     ...options.input.options,
     absolute: true
   });
   const result: TEvaluationResult = {
-    files: []
+    files: [],
+    stdout
   };
 
   for (const filename of files) {
@@ -228,10 +244,11 @@ export const evaluate = async (
       const transformed = await transform({
         program,
         filename,
-        evaluationOptions: options
+        evaluationOptions: options,
+        stdout
       });
       if (transformed.changed) {
-        console.log(transformed.content);
+        stdout.push(transformed.content);
         // await writeFile(file, transformed.content);
       }
     } catch (e) {
@@ -239,6 +256,8 @@ export const evaluate = async (
     }
     result.files.push(filename);
   }
+
+  stdout.push(null);
 
   return result;
 };

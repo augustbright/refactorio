@@ -8,16 +8,23 @@ import { tokenize } from 'src/tokenizer';
 
 describe('evaluator', () => {
   test('iterates through a list of files by pattern', async () => {
-    const { files } = await evaluate(parse(tokenize(`print('hello world!')`)), {
-      input: {
-        files: ['**/*.tsx', '**/*.ts', '**/*.js', '**/*.jsx'],
-        options: {
-          ignore: ['node_modules/**', 'build/**'],
-          cwd: mockRepoPath()
-        }
-      },
-      parser
-    });
+    const { files, stdout } = await evaluate(
+      parse(tokenize(`print(context.filename + ': hello world!')`)),
+      {
+        input: {
+          files: ['**/*.tsx', '**/*.ts', '**/*.js', '**/*.jsx'],
+          options: {
+            ignore: ['node_modules/**', 'build/**'],
+            cwd: mockRepoPath()
+          }
+        },
+        parser
+      }
+    );
+
+    for await (const chunk of stdout) {
+      console.log(chunk.toString());
+    }
 
     console.log(files);
   });
