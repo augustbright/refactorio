@@ -1,0 +1,11 @@
+{
+    "extends": "../../tsconfig.json",
+    "compilerOptions": {
+      "outDir": "./out",
+      "target": "ES6",
+      "module": "commonjs",
+      "lib": ["ES6"],
+      "sourceMap": true,
+    },
+    "include": ["src/**/*", "../engine/src/**/*",]
+  }

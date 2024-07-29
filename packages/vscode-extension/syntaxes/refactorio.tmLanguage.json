@@ -7,6 +7,14 @@
 		},
 		{
 			"include": "#strings"
+		},
+		{
+			"name": "constant.numeric.refactorio",
+			"match": "\\b\\d+\\b"
+		},
+		{
+			"name": "variable.refactorio",
+			"match": "\\b[a-zA-Z_][a-zA-Z0-9_]*\\b"
 		}
 	],
 	"repository": {
@@ -14,14 +22,18 @@
 			"patterns": [
 				{
 					"name": "keyword.control.refactorio",
-					"match": "\\b(if|while|for|return)\\b"
+					"match": "\\b(SET|IF|ELSE|IN|AS|REPLACE|WITH|REMOVE|FUNCTION|AND|OR)\\b"
+				},
+				{
+					"name": "keyword.operator.refactorio",
+					"match": "(==|!=|=)"
 				}
 			]
 		},
 		"strings": {
-			"name": "string.quoted.double.refactorio",
-			"begin": "\"",
-			"end": "\"",
+			"name": "string.quoted.single.refactorio",
+			"begin": "'",
+			"end": "'",
 			"patterns": [
 				{
 					"name": "constant.character.escape.refactorio",

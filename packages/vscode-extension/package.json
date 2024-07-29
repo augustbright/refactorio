@@ -1,25 +1,57 @@
 {
-  "name": "refactorio-vscode-extension",
-  "displayName": "refactorio",
+  "name": "@refactorio/vscode-extension",
+  "displayName": "Refactorio",
+  "publisher": "augustbright",
   "description": "Refactorio language support",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.91.0"
   },
+  "main": "./out/extension.js",
   "categories": [
     "Programming Languages"
   ],
   "contributes": {
-    "languages": [{
-      "id": "refactorio",
-      "aliases": ["Refactorio", "refactorio"],
-      "extensions": [".rf.io"],
-      "configuration": "./language-configuration.json"
-    }],
-    "grammars": [{
-      "language": "refactorio",
-      "scopeName": "source.refactorio",
-      "path": "./syntaxes/refactorio.tmLanguage.json"
-    }]
+    "languages": [
+      {
+        "id": "refactorio",
+        "aliases": [
+          "Refactorio",
+          "refactorio"
+        ],
+        "extensions": [
+          ".rf.io",
+          "rfio"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "refactorio",
+        "scopeName": "source.refactorio",
+        "path": "./syntaxes/refactorio.tmLanguage.json"
+      }
+    ],
+    "codeLensProviders": [
+      {
+        "language": "refactorio",
+        "provideCodeLenses": true
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "postinstall": "node ./out/compile.js"
+  },
+  "devDependencies": {
+    "typescript": "^5.5.4",
+    "vscode-test": "^1.6.1"
+  },
+  "dependencies": {
+    "@refactorio/engine": "*",
+    "vscode": "^1.1.37"
   }
 }

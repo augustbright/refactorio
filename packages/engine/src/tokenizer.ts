@@ -10,6 +10,8 @@ export const TOKEN_TYPES = [
   { regex: /^AS/, type: 'AS' },
   { regex: /^REPLACE/, type: 'REPLACE' },
   { regex: /^WITH/, type: 'WITH' },
+  { regex: /^REMOVE/, type: 'REMOVE' },
+  { regex: /^FUNCTION/, type: 'FUNCTION' },
   { regex: /^AND/, type: 'AND' },
   { regex: /^OR/, type: 'OR' },
 
