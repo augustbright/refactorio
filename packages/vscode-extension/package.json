@@ -1,11 +1,25 @@
 {
-  "name": "vscode-extension",
-  "version": "1.0.0",
-  "main": "index.js",
-  "license": "MIT",
-  "devDependencies": {
-    "generator-code": "^1.11.1",
-    "vsce": "^2.15.0",
-    "yo": "^5.0.0"
+  "name": "refactorio-vscode-extension",
+  "displayName": "refactorio",
+  "description": "Refactorio language support",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.91.0"
+  },
+  "categories": [
+    "Programming Languages"
+  ],
+  "contributes": {
+    "languages": [{
+      "id": "refactorio",
+      "aliases": ["Refactorio", "refactorio"],
+      "extensions": [".rf.io"],
+      "configuration": "./language-configuration.json"
+    }],
+    "grammars": [{
+      "language": "refactorio",
+      "scopeName": "source.refactorio",
+      "path": "./syntaxes/refactorio.tmLanguage.json"
+    }]
   }
 }
