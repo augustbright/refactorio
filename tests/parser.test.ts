@@ -157,6 +157,101 @@ describe('parser', () => {
     });
   });
 
+  test('IN statement', () => {
+    expect(
+      parse(
+        tokenize(`IN BlockStatement AS block print('Hello from some Block!')`)
+      )
+    ).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'InStatement',
+          alias: 'block',
+          selector: [{ type: 'TSelectorPattern', nodeType: 'BlockStatement' }],
+          statement: {
+            type: 'CallExpression',
+            callee: { type: 'Identifier', name: 'print' },
+            arguments: [{ type: 'Literal', value: 'Hello from some Block!' }]
+          }
+        }
+      ]
+    });
+
+    expect(
+      parse(
+        tokenize(
+          `IN BlockStatement Identifier[name=='foo'] AS i REPLACE WITH i.with({name: 'bar'})`
+        )
+      )
+    ).toEqual({
+      type: 'Program',
+      body: [
+        {
+          type: 'InStatement',
+          alias: 'i',
+          selector: [
+            { type: 'TSelectorPattern', nodeType: 'BlockStatement' },
+            {
+              type: 'TSelectorPattern',
+              nodeType: 'Identifier',
+              filter: [
+                {
+                  type: 'BinaryExpression',
+                  operator: 'EQUALITY',
+                  left: { type: 'Identifier', name: 'name' },
+                  right: { type: 'Literal', value: 'foo' }
+                }
+              ]
+            }
+          ],
+          statement: {
+            type: 'ReplaceStatement',
+            selector: [],
+            newValue: {
+              type: 'CallExpression',
+              callee: {
+                type: 'MemberExpression',
+                object: { type: 'Identifier', name: 'i' },
+                property: 'with'
+              },
+              arguments: [
+                {
+                  type: 'ObjectLiteral',
+                  map: { name: { type: 'Literal', value: 'bar' } }
+                }
+              ]
+            }
+          }
+        }
+      ]
+    });
+
+    expect(
+      prettyText(
+        parse(
+          tokenize(`
+IN BlockStatement AS block
+  SET replaced = 0
+
+  IN VariableDeclaration[kind == 'const'] AS declaration
+    IN VariableDeclarator Identifier AS i
+      IN block Identifier[name == i.name] AS same
+        IF count(same) == 2
+          REPLACE same WITH declaration.init
+          REMOVE declaration
+          replaced = replaced + 1
+
+  print('Replaced: ' + replaced + 'usages')
+`)
+        ),
+        0
+      )
+    ).toBe(
+      `IN BlockStatement AS block {SET replaced = 0;IN VariableDeclaration[(kind == 'const')] AS declaration {IN VariableDeclarator Identifier AS i {IN block Identifier[(name == i.name)] AS same {IF (count(same) == 2) {REPLACE same WITH declaration.init;REMOVE;declaration;replaced = (replaced + 1)}}}};print((('Replaced: ' + replaced) + 'usages'))}`
+    );
+  });
+
   test('call expressions', () => {
     expect(parse(tokenize(`foo()`))).toEqual({
       type: 'Program',
@@ -243,13 +338,13 @@ describe('parser', () => {
 SET hit = false
 SET foo = 'one' + 'two'
 
-REPLACE ImportDefaultSpecifier.local.name == 'css'
+REPLACE ImportDefaultSpecifier[local.name == 'css']
 WITH ImportDefaultSpecifier(Identifier('styles'))
 AND hit = TRUE
 OR hit = TRUE
 
 IF hit == TRUE
-	REPLACE Identifier.name == 'css'
+	REPLACE Identifier[name == 'css']
     WITH Identifier('styles')
     AND hit = FALSE
 `)
@@ -257,17 +352,17 @@ IF hit == TRUE
         0
       )
     ).toBe(
-      `SET hit = false;SET foo = ('one' + 'two');REPLACE (ImportDefaultSpecifier.local.name == 'css') WITH ImportDefaultSpecifier(Identifier('styles')) AND hit = TRUE OR hit = TRUE;IF (hit == TRUE) {REPLACE (Identifier.name == 'css') WITH Identifier('styles') AND hit = FALSE}`
+      `SET hit = false;SET foo = ('one' + 'two');REPLACE ImportDefaultSpecifier[(local.name == 'css')] WITH ImportDefaultSpecifier(Identifier('styles')) AND hit = TRUE OR hit = TRUE;IF (hit == TRUE) {REPLACE Identifier[(name == 'css')] WITH Identifier('styles') AND hit = FALSE}`
     );
 
     expect(
       prettyText(
         parse(
           tokenize(`
-REPLACE ImportDefaultSpecifier.local.name == 'css'
+REPLACE ImportDefaultSpecifier[local.name == 'css']
 WITH ImportDefaultSpecifier(Identifier('styles'))
 AND
-	REPLACE Identifier.name == 'css'
+	REPLACE Identifier[name == 'css']
     WITH Identifier('styles')
     AND hit = TRUE
 
@@ -278,7 +373,7 @@ IF hit == TRUE
         0
       )
     ).toBe(
-      `REPLACE (ImportDefaultSpecifier.local.name == 'css') WITH ImportDefaultSpecifier(Identifier('styles')) AND {REPLACE (Identifier.name == 'css') WITH Identifier('styles') AND hit = TRUE};IF (hit == TRUE) {print('success!')}`
+      `REPLACE ImportDefaultSpecifier[(local.name == 'css')] WITH ImportDefaultSpecifier(Identifier('styles')) AND {REPLACE Identifier[(name == 'css')] WITH Identifier('styles') AND hit = TRUE};IF (hit == TRUE) {print('success!')}`
     );
   });
 });

@@ -1,4 +1,8 @@
+import { TOKEN_TYPES } from 'src/tokenizer';
+
+export type TTokenType = (typeof TOKEN_TYPES)[number]['type'];
+
 export type TToken = {
-  type: string;
+  type: TTokenType;
   value: string;
 };

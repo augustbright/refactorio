@@ -1,4 +1,4 @@
-import { TCommonNode, TOperator } from 'src/types/ast';
+import { TCommonNode, TOperator, TSelectorPattern } from 'src/types/ast';
 import { AssertTrue, Equals } from 'src/types/utils';
 
 const OPERATOR_VIEW: Record<TOperator, string> = {
@@ -11,6 +11,9 @@ const OPERATOR_VIEW: Record<TOperator, string> = {
   AND: 'AND',
   OR: 'OR'
 };
+
+const printSelector = (selector: TSelectorPattern[], level: number) =>
+  selector.map((child) => prettyText(child, level + 1)).join(' ');
 
 export const prettyText = (node: TCommonNode, level: number): string => {
   switch (node.type) {
@@ -52,7 +55,38 @@ export const prettyText = (node: TCommonNode, level: number): string => {
     case 'CallExpression':
       return `${prettyText(node.callee, level)}(${node.arguments.map((argument) => prettyText(argument, level)).join(',')})`;
     case 'ReplaceStatement':
-      return `REPLACE ${prettyText(node.selector, level)} WITH ${prettyText(node.newValue, level)}${node.andStatement ? ' AND ' + prettyText(node.andStatement, level) : ''}${node.orStatement ? ' OR ' + prettyText(node.orStatement, level) : ''}`;
+      return `REPLACE ${printSelector(node.selector, level)} WITH ${prettyText(node.newValue, level)}${node.andStatement ? ' AND ' + prettyText(node.andStatement, level) : ''}${node.orStatement ? ' OR ' + prettyText(node.orStatement, level) : ''}`;
+    case 'InStatement':
+      return [
+        `IN ${printSelector(node.selector, level)}`,
+        node.alias ? `AS ${node.alias}` : null,
+        prettyText(node.statement, level)
+      ]
+        .filter(Boolean)
+        .join(' ');
+    case 'TSelectorPattern':
+      return [
+        node.nodeType,
+        node.filter
+          ? [
+              '[',
+              ...(node.filter || []).map((expression) =>
+                prettyText(expression, level)
+              ),
+              ']'
+            ]
+          : null
+      ]
+        .flat()
+        .join('');
+    case 'ObjectLiteral':
+      return (
+        `{` +
+        Object.entries(node.map).map(
+          ([key, expression]) => `${key}: ${prettyText(expression, level)}`
+        ) +
+        `}`
+      );
     default:
       true as AssertTrue<Equals<typeof node, never>>;
       //@ts-expect-error type of node should be never by default

@@ -24,9 +24,15 @@ export interface TAssignment extends TNode {
   value: TExpression;
 }
 
+export interface TInStatement extends TNode {
+  type: 'InStatement';
+  selector: TSelectorPattern[];
+  alias: string;
+  statement: TStatement;
+}
 export interface TReplaceStatement extends TNode {
   type: 'ReplaceStatement';
-  selector: TExpression;
+  selector: TSelectorPattern[];
   newValue: TExpression;
   andStatement?: TStatement;
   orStatement?: TStatement;
@@ -49,6 +55,11 @@ export interface TLiteral extends TNode {
   value: string | number | boolean;
 }
 
+export interface TObjectLiteral extends TNode {
+  type: 'ObjectLiteral';
+  map: Record<string, TExpression>;
+}
+
 export interface TBinaryExpression extends TNode {
   type: 'BinaryExpression';
   operator: TOperator;
@@ -60,6 +71,12 @@ export interface TCallExpression extends TNode {
   type: 'CallExpression';
   callee: TExpression;
   arguments: TExpression[];
+}
+
+export interface TSelectorPattern extends TNode {
+  type: 'TSelectorPattern';
+  nodeType: string;
+  filter?: TExpression[];
 }
 
 export interface TMemberExpression extends TNode {
@@ -79,11 +96,13 @@ export type TStatement =
   | TIfStatement
   | TAssignment
   | TBlock
-  | TExpression;
+  | TExpression
+  | TInStatement;
 
 export type TExpression =
   | TIdentifier
   | TLiteral
+  | TObjectLiteral
   | TBinaryExpression
   | TMemberExpression
   | TCallExpression;
@@ -93,4 +112,8 @@ export interface TProgram extends TNode {
   body: TStatement[];
 }
 
-export type TCommonNode = TProgram | TStatement | TExpression;
+export type TCommonNode =
+  | TProgram
+  | TStatement
+  | TExpression
+  | TSelectorPattern;
