@@ -1,4 +1,4 @@
-import { tokenize } from 'src/tokenizer';
+import { tokenize } from 'engine/tokenizer';
 
 describe('tokenizer', () => {
   test('generates tokens', () => {

@@ -1,10 +1,9 @@
+import { evaluate } from 'engine/evaluator';
+import { parse } from 'engine/parser';
+import { tokenize } from 'engine/tokenizer';
 import * as parser from 'recast/parsers/babel-ts.js';
 
 import { mockRepoPath } from './testUtils';
-
-import { evaluate } from 'src/evaluator';
-import { parse } from 'src/parser';
-import { tokenize } from 'src/tokenizer';
 
 describe('evaluator', () => {
   test('iterates through a list of files by pattern', async () => {

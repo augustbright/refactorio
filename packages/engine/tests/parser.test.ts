@@ -1,6 +1,6 @@
-import { parse } from 'src/parser';
-import { tokenize } from 'src/tokenizer';
-import { prettyText } from 'src/utils/prettyText';
+import { parse } from 'engine/parser';
+import { tokenize } from 'engine/tokenizer';
+import { prettyText } from 'engine/utils/prettyText';
 
 describe('parser', () => {
   test('parses tokens', () => {
