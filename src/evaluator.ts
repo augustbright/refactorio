@@ -6,6 +6,7 @@ import { Readable, Stream } from 'stream';
 import {
   TBinaryExpression,
   TExpression,
+  TObjectLiteral,
   TProgram,
   TStatement
 } from './types/ast';
@@ -90,6 +91,19 @@ const transform = async ({
     throw new Error(`Expression is not callable`);
   };
 
+  const object = async (
+    expression: TObjectLiteral
+  ): Promise<Record<string, unknown>> => {
+    return Object.fromEntries(
+      await Promise.all(
+        Object.entries(expression.map).map(async ([key, expression]) => [
+          key,
+          await evaluateExpression(expression)
+        ])
+      )
+    );
+  };
+
   const evaluateBinaryExpression = async (expression: TBinaryExpression) => {
     const left = await evaluateExpression(expression.left);
     const right = await evaluateExpression(expression.right);
@@ -153,6 +167,8 @@ const transform = async ({
         return member(expression.object, expression.property);
       case 'CallExpression':
         return call(expression.callee, expression.arguments);
+      case 'ObjectLiteral':
+        return object(expression);
       default:
         true as AssertTrue<Equals<typeof expression, never>>;
         // @ts-expect-error expression should be of type "never"
@@ -162,10 +178,12 @@ const transform = async ({
 
   const evaluateStatement = async (statement: TStatement) => {
     switch (statement.type) {
+      case 'ObjectLiteral':
       case 'BinaryExpression':
       case 'Identifier':
       case 'Literal':
       case 'MemberExpression':
+        evaluateExpression(statement);
         break;
       case 'VariableDeclaration':
         declare({
@@ -192,8 +210,10 @@ const transform = async ({
       case 'Block':
         await Promise.all(statement.body.map(evaluateStatement));
         break;
+      case 'InStatement':
+        throw 'Not implemented';
       case 'ReplaceStatement':
-        throw new Error('not implemented');
+        throw 'not implemented';
       default:
         true as AssertTrue<Equals<typeof statement, never>>;
         // @ts-expect-error statement should be of type "never"
