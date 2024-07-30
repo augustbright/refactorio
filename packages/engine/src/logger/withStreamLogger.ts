@@ -1,5 +1,3 @@
-import { Readable } from 'stream';
-
 import { TWithStreamLogger } from './types';
 
 import { Logger } from 'src/logger/Logger';
@@ -8,7 +6,7 @@ export const withStreamLogger = <
   CommonArgs extends Array<unknown>,
   OriginalResult
 >(
-  fn: (logger: Readable, ...args: CommonArgs) => OriginalResult
+  fn: (logger: Logger, ...args: CommonArgs) => OriginalResult
 ): ((...args: CommonArgs) => TWithStreamLogger<OriginalResult>) => {
   return (...args: CommonArgs) => {
     const logger = new Logger();
@@ -17,8 +15,8 @@ export const withStreamLogger = <
 
     Promise.resolve()
       .then(() => originalResult)
-      .then(() => logger.push(null));
+      .then(() => logger.end());
 
-    return { logger, result: originalResult };
+    return { output: logger.output, result: originalResult };
   };
 };

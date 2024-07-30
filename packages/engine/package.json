@@ -9,6 +9,7 @@
     "test": "jest",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
+    "checkTypes": "tsc --noEmit",
     "compile": "tsc -p ./ --project tsconfig.build.json"
   },
   "devDependencies": {

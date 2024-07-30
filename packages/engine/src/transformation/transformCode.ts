@@ -1,5 +1,3 @@
-import { Readable } from 'stream';
-
 import { withStreamLogger } from '../logger/withStreamLogger';
 import { parseScript } from '../utils/parseScript';
 import { TGlobalContext, TParser, TScriptDefinition } from './types';
@@ -26,7 +24,7 @@ type TTransformCodeResult = {
 
 export const transformCode = withStreamLogger(
   async (
-    out: Readable,
+    logger,
     {
       code,
       // parser,
@@ -38,7 +36,7 @@ export const transformCode = withStreamLogger(
     // const changed = false;
     const globals: Record<string, unknown> = {
       print: (text: string) => {
-        out.push(text);
+        logger.log(text);
       },
       context: globalContext
     } as const;

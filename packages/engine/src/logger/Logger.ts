@@ -1,11 +1,5 @@
 import { LoggerOutput, createLoggerOutput } from './LoggerOutput';
-import {
-  TAnyEntry,
-  TDirPayload,
-  TEntryType,
-  TErrorPayload,
-  TMessagePayload
-} from './entry';
+import { TDirPayload, TErrorPayload, TMessagePayload } from './entry';
 import {
   AssertionEntry,
   DebugEntry,
@@ -15,12 +9,11 @@ import {
   LogEntry,
   WarnEntry
 } from './entry/implementations';
-import { LogLevel } from './entry/types';
 import { ILogging, TPushFn, TTimingBreakpoints } from './types';
 
 export class Logger implements ILogging {
   readonly output: LoggerOutput;
-  private push: TPushFn;
+  push: TPushFn;
 
   constructor() {
     const { output, push } = createLoggerOutput();
@@ -29,33 +22,33 @@ export class Logger implements ILogging {
   }
 
   debug(message: TMessagePayload): void {
-    this.put(new DebugEntry(message));
+    this.push(new DebugEntry(message));
   }
 
   info(message: TMessagePayload): void {
-    this.put(new InfoEntry(message));
+    this.push(new InfoEntry(message));
   }
 
   log(message: TMessagePayload): void {
-    this.put(new LogEntry(message));
+    this.push(new LogEntry(message));
   }
 
   warn(message: TMessagePayload): void {
-    this.put(new WarnEntry(message));
+    this.push(new WarnEntry(message));
   }
 
   error(error: TErrorPayload): void {
-    this.put(new ErrorEntry(error));
+    this.push(new ErrorEntry(error));
   }
 
   assert(assertion: boolean, message: TMessagePayload): void {
     if (!assertion) {
-      this.put(new AssertionEntry(message));
+      this.push(new AssertionEntry(message));
     }
   }
 
   dir(value: TDirPayload): void {
-    this.put(new DirEntry(value));
+    this.push(new DirEntry(value));
   }
 
   time(label: string, breakpoints: TTimingBreakpoints): void {
@@ -66,30 +59,8 @@ export class Logger implements ILogging {
     this.finishTime(label);
   }
 
-  private readonly memory: TAnyEntry[] = [];
-  private readonly byLevel: Record<LogLevel, TAnyEntry[]> = {
-    [LogLevel.VERBOSE]: [],
-    [LogLevel.INFO]: [],
-    [LogLevel.WARNING]: [],
-    [LogLevel.ERROR]: []
-  };
-  private readonly byEntryType: Record<TEntryType, TAnyEntry[]> = {
-    DEBUG: [],
-    INFO: [],
-    LOG: [],
-    WARN: [],
-    ERROR: [],
-    ASSERTION: [],
-    DIR: [],
-    TIME_END: []
-  };
-
-  private put(entry: TAnyEntry): void {
-    this.memory.push(entry);
-    this.byLevel[entry.level].push(entry);
-    this.byEntryType[entry.type].push(entry);
-
-    this.push(entry);
+  end() {
+    this.push(null);
   }
 
   private startTime(label: string, breakpoints: TTimingBreakpoints): void {

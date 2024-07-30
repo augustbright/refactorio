@@ -1,6 +1,7 @@
 import { Readable } from 'stream';
 
-import { TAnyEntry, TEntryFilter } from './entry';
+import { TAnyEntry, TEntryFilter, TEntryType } from './entry';
+import { LogLevel } from './entry/types';
 import { TPushFn } from './types';
 
 export class LoggerOutput {
@@ -30,9 +31,33 @@ export class LoggerOutput {
     pushReceiver(this.push.bind(this));
   }
 
-  private push(data: TAnyEntry | null) {
-    this.baseStream.push(data);
+  private push(entry: TAnyEntry | null) {
+    this.baseStream.push(entry);
+
+    if (entry !== null) {
+      this.memory.push(entry);
+      this.byLevel[entry.level].push(entry);
+      this.byEntryType[entry.type].push(entry);
+    }
   }
+  private readonly memory: TAnyEntry[] = [];
+  private readonly byLevel: Record<LogLevel, TAnyEntry[]> = {
+    [LogLevel.VERBOSE]: [],
+    [LogLevel.INFO]: [],
+    [LogLevel.WARNING]: [],
+    [LogLevel.ERROR]: []
+  };
+  private readonly byEntryType: Record<TEntryType, TAnyEntry[]> = {
+    DEBUG: [],
+    INFO: [],
+    LOG: [],
+    WARN: [],
+    ERROR: [],
+    ASSERTION: [],
+    DIR: [],
+    TIME_END: []
+  };
+
   private isEnded = false;
   private baseStream = new Readable({
     objectMode: true,

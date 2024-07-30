@@ -1,5 +1,4 @@
 import { GlobOptionsWithFileTypesUnset, glob } from 'glob';
-import { Readable } from 'stream';
 
 import { withStreamLogger } from '../logger/withStreamLogger';
 import { transformFile } from './transformFile';
@@ -15,12 +14,11 @@ type TTransformCodebaseOptions = {
 
 type TTransformCodebaseResult = {
   files: string[];
-  out: Readable;
 };
 
 export const transformCodebase = withStreamLogger(
   async (
-    out: Readable,
+    logger,
     script: TScriptDefinition,
     { input, parser }: TTransformCodebaseOptions
   ): Promise<TTransformCodebaseResult> => {
@@ -29,30 +27,26 @@ export const transformCodebase = withStreamLogger(
       absolute: true
     });
     const codebaseResult: TTransformCodebaseResult = {
-      files: [],
-      out
+      files: []
     };
 
     for (const filename of files) {
       try {
-        const { logger: fileLogger, result } = transformFile({
+        const { output: fileOutput, result } = transformFile({
           script,
           filename,
           parser
         });
 
-        fileLogger.on('data', (chunk) => {
-          out.push(chunk);
-        });
+        fileOutput.filtered({}).on('data', logger.push);
 
         const { code, isChanged } = await result;
         if (isChanged) {
-          // TODO implement a decent logger
-          out.push(code);
+          logger.debug(code);
           // await writeFile(file, transformed.content);
         }
       } catch (e) {
-        console.error(`Error transforming ${filename}: ${e}`);
+        logger.error(`Error transforming ${filename}: ${e}`);
       }
       codebaseResult.files.push(filename);
     }

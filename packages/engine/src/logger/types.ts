@@ -1,4 +1,4 @@
-import { Logger } from './Logger';
+import { LoggerOutput } from './LoggerOutput';
 import {
   TAnyEntry,
   TDirPayload,
@@ -8,7 +8,7 @@ import {
 import { LogLevel } from './entry/types';
 
 export type TWithStreamLogger<Result> = {
-  logger: Logger;
+  output: LoggerOutput;
   result: Result;
 };
 

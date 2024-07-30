@@ -55,7 +55,8 @@
     "watch": "tsc -watch -p ./",
     "test": "jest",
     "lint": "eslint 'src/**/*.{ts,js}'",
-    "lint:fix": "eslint 'src/**/*.{ts,js}' --fix"
+    "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
+    "checkTypes": "tsc --noEmit"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",
