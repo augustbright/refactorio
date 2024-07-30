@@ -8,16 +8,8 @@
       "forceConsistentCasingInFileNames": true,
       "outDir": "./dist",
       "rootDir": ".",
-      "baseUrl": ".",
-      "paths": {
-        "engine/*": ["packages/engine/src/*"],
-      }
+      "baseUrl": "."
     },
-    // "include": [
-    //   "next-env.d.ts",
-    //   "**/*.ts",
-    //   "**/*.tsx",
-    // ],
-    "include": ["packages/*/src/**/*", "packages/*/tests/**/*"],
+    "include": ["packages/*/src/**/*"],
     "exclude": ["node_modules"]
   }

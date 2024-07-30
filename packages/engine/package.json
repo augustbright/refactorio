@@ -1,14 +1,14 @@
 {
   "name": "@refactorio/engine",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "./dist/src/index.js",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "start": "node dist/index.js",
+    "start": "node ./dist/index.js",
     "dev": "ts-node src/index.ts",
     "test": "jest",
-    "lint": "eslint 'src/**/*.{ts,js}'"
+    "lint": "eslint 'src/**/*.{ts,js}'",
+    "compile": "tsc -p ./ --project tsconfig.build.json"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",

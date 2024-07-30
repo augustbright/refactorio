@@ -1,0 +1,26 @@
+FUNCTION replaceFunctionUsage(oldModule, oldFunction, newModule, newFunction) {
+    // Step 1: Find all import declarations for the old module
+    IN ImportDeclaration[source.value = oldModule] AS oldImport
+        // Step 2: Find the specific import specifier for the old function
+        IN oldImport ImportSpecifier[imported.name = oldFunction] AS oldSpecifier
+
+		    // Step 3: Replace the old import specifier with the new one
+		    REPLACE oldSpecifier WITH ImportSpecifier {
+		        imported: Identifier { name: newFunction },
+		        local: Identifier { name: newFunction }
+		    }
+    AND
+
+	    // Step 4: Replace all usages of the old function with the new function
+	    IN CallExpression[callee.name = oldFunction] AS oldCall
+	        // Step 5: Ensure the function is called from the correct module
+	        IN oldCall MemberExpression[object.name = oldModule, property.name = oldFunction] AS oldMember
+	            // Step 6: Replace the old function call with the new function call
+	            REPLACE oldMember WITH MemberExpression {
+	                object: Identifier { name: newModule },
+	                property: Identifier { name: newFunction }
+	            }
+}
+
+// Example usage of the function to replace "map" from "underscore" with "map" from "lodash"
+replaceFunctionUsage('underscore', 'map', 'lodash', 'map')

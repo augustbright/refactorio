@@ -1,22 +1,14 @@
-import { parse } from 'engine/parser';
-import { tokenize } from 'engine/tokenizer';
-import { prettyText } from 'engine/utils/prettyText';
+import { parse } from 'src/parser';
+import { prettyText } from 'src/utils/prettyText';
 
 describe('parser', () => {
   test('parses tokens', () => {
-    expect(parse([])).toEqual({
+    expect(parse('')).toEqual({
       type: 'Program',
       body: []
     });
 
-    expect(
-      parse([
-        { type: 'SET', value: 'SET' },
-        { type: 'IDENTIFIER', value: 'foo' },
-        { type: 'ASSIGN', value: '=' },
-        { type: 'NUMBER', value: '123' }
-      ])
-    ).toEqual({
+    expect(parse('SET foo = 123')).toEqual({
       type: 'Program',
       body: [
         {
@@ -30,17 +22,7 @@ describe('parser', () => {
       ]
     });
 
-    expect(
-      parse([
-        { type: 'IF', value: 'IF' },
-        { type: 'IDENTIFIER', value: 'foo' },
-        { type: 'EQUALITY', value: '==' },
-        { type: 'STRING', value: `'hello'` },
-        { type: 'IDENTIFIER', value: 'bar' },
-        { type: 'ASSIGN', value: '=' },
-        { type: 'BOOLEAN', value: 'TRUE' }
-      ])
-    ).toEqual({
+    expect(parse(`IF foo == 'hello' bar = TRUE`)).toEqual({
       type: 'Program',
       body: [
         {
@@ -73,45 +55,21 @@ describe('parser', () => {
   test('parses block statements', () => {
     expect(
       prettyText(
-        parse([
-          { type: 'IF', value: 'IF' },
-          { type: 'BOOLEAN', value: 'TRUE' },
-
-          { type: 'NEWLINE', value: '' },
-          { type: 'INDENTATION', value: '  ' },
-
-          { type: 'IDENTIFIER', value: 'foo' },
-          { type: 'ASSIGN', value: '=' },
-          { type: 'NUMBER', value: '1' },
-
-          { type: 'NEWLINE', value: '' },
-          { type: 'INDENTATION', value: '  ' },
-
-          { type: 'IF', value: 'IF' },
-          { type: 'BOOLEAN', value: 'FALSE' },
-          { type: 'NEWLINE', value: '' },
-          { type: 'INDENTATION', value: '    ' },
-          { type: 'IDENTIFIER', value: 'foo' },
-          { type: 'ASSIGN', value: '=' },
-          { type: 'NUMBER', value: '1' },
-
-          { type: 'NEWLINE', value: '' },
-          { type: 'ELSE', value: 'ELSE' },
-
-          { type: 'NEWLINE', value: '' },
-          { type: 'INDENTATION', value: '  ' },
-
-          { type: 'IDENTIFIER', value: 'baz' },
-          { type: 'ASSIGN', value: '=' },
-          { type: 'NUMBER', value: '3' }
-        ]),
+        parse(`
+IF TRUE
+  foo = 1
+  IF FALSE
+    foo = 1
+ELSE
+  baz = 3
+`),
         0
       )
     ).toEqual(`IF TRUE {foo = 1;IF FALSE {foo = 1}} ELSE {baz = 3}`);
   });
 
   test('object member expression', () => {
-    expect(parse(tokenize('SET foo = foo.prop1'))).toEqual({
+    expect(parse('SET foo = foo.prop1')).toEqual({
       type: 'Program',
       body: [
         {
@@ -126,7 +84,7 @@ describe('parser', () => {
       ]
     });
 
-    expect(parse(tokenize(`SET foo = ('foo' + 'bar').prop1.prop2`))).toEqual({
+    expect(parse(`SET foo = ('foo' + 'bar').prop1.prop2`)).toEqual({
       type: 'Program',
       body: [
         {
@@ -159,9 +117,7 @@ describe('parser', () => {
 
   test('IN statement', () => {
     expect(
-      parse(
-        tokenize(`IN BlockStatement AS block print('Hello from some Block!')`)
-      )
+      parse(`IN BlockStatement AS block print('Hello from some Block!')`)
     ).toEqual({
       type: 'Program',
       body: [
@@ -180,9 +136,7 @@ describe('parser', () => {
 
     expect(
       parse(
-        tokenize(
-          `IN BlockStatement Identifier[name=='foo'] AS i REPLACE WITH i.with({name: 'bar'})`
-        )
+        `IN BlockStatement Identifier[name=='foo'] AS i REPLACE WITH i.with({name: 'bar'})`
       )
     ).toEqual({
       type: 'Program',
@@ -229,8 +183,7 @@ describe('parser', () => {
 
     expect(
       prettyText(
-        parse(
-          tokenize(`
+        parse(`
 IN BlockStatement AS block
   SET replaced = 0
 
@@ -239,21 +192,19 @@ IN BlockStatement AS block
       IN block Identifier[name == i.name] AS same
         IF count(same) == 2
           REPLACE same WITH declaration.init
-          REMOVE declaration
           replaced = replaced + 1
 
   print('Replaced: ' + replaced + 'usages')
-`)
-        ),
+`),
         0
       )
     ).toBe(
-      `IN BlockStatement AS block {SET replaced = 0;IN VariableDeclaration[(kind == 'const')] AS declaration {IN VariableDeclarator Identifier AS i {IN block Identifier[(name == i.name)] AS same {IF (count(same) == 2) {REPLACE same WITH declaration.init;REMOVE;declaration;replaced = (replaced + 1)}}}};print((('Replaced: ' + replaced) + 'usages'))}`
+      `IN BlockStatement AS block {SET replaced = 0;IN VariableDeclaration[(kind == 'const')] AS declaration {IN VariableDeclarator Identifier AS i {IN block Identifier[(name == i.name)] AS same {IF (count(same) == 2) {REPLACE same WITH declaration.init;replaced = (replaced + 1)}}}};print((('Replaced: ' + replaced) + 'usages'))}`
     );
   });
 
   test('call expressions', () => {
-    expect(parse(tokenize(`foo()`))).toEqual({
+    expect(parse(`foo()`)).toEqual({
       type: 'Program',
       body: [
         {
@@ -266,7 +217,7 @@ IN BlockStatement AS block
         }
       ]
     });
-    expect(parse(tokenize(`foo(a, b, c)`))).toEqual({
+    expect(parse(`foo(a, b, c)`)).toEqual({
       type: 'Program',
       body: [
         {
@@ -295,25 +246,23 @@ IN BlockStatement AS block
   });
 
   test('complex expressions', () => {
-    expect(
-      prettyText(parse(tokenize('SET foo = foo.prop1 + foo.prop2')), 0)
-    ).toBe('SET foo = (foo.prop1 + foo.prop2)');
+    expect(prettyText(parse('SET foo = foo.prop1 + foo.prop2'), 0)).toBe(
+      'SET foo = (foo.prop1 + foo.prop2)'
+    );
 
-    expect(prettyText(parse(tokenize('SET foo = 2 + 2 * 2')), 0)).toBe(
+    expect(prettyText(parse('SET foo = 2 + 2 * 2'), 0)).toBe(
       'SET foo = (2 + (2 * 2))'
     );
-    expect(prettyText(parse(tokenize('SET foo = (2 + 2) * 2')), 0)).toBe(
+    expect(prettyText(parse('SET foo = (2 + 2) * 2'), 0)).toBe(
       'SET foo = ((2 + 2) * 2)'
     );
-    expect(
-      prettyText(parse(tokenize(`IF (2 + 2) * 2 == 8 foo = 'hello'`)), 0)
-    ).toBe(`IF (((2 + 2) * 2) == 8) foo = 'hello'`);
+    expect(prettyText(parse(`IF (2 + 2) * 2 == 8 foo = 'hello'`), 0)).toBe(
+      `IF (((2 + 2) * 2) == 8) foo = 'hello'`
+    );
     expect(
       prettyText(
         parse(
-          tokenize(
-            `IF (2 + 2) * 2 == 8 AND foo != 'hello' foo = 'hello' + 'there' + '!' ELSE foo = 'bye'`
-          )
+          `IF (2 + 2) * 2 == 8 AND foo != 'hello' foo = 'hello' + 'there' + '!' ELSE foo = 'bye'`
         ),
         0
       )
@@ -322,18 +271,14 @@ IN BlockStatement AS block
     );
 
     expect(
-      prettyText(
-        parse(tokenize(`obj.func1(some.func2() + other.func3()().result())`)),
-        0
-      )
+      prettyText(parse(`obj.func1(some.func2() + other.func3()().result())`), 0)
     ).toBe(`obj.func1((some.func2() + other.func3()().result()))`);
   });
 
   test('code parsing', () => {
     expect(
       prettyText(
-        parse(
-          tokenize(`
+        parse(`
 // define a variable
 SET hit = false
 SET foo = 'one' + 'two'
@@ -347,8 +292,7 @@ IF hit == TRUE
 	REPLACE Identifier[name == 'css']
     WITH Identifier('styles')
     AND hit = FALSE
-`)
-        ),
+`),
         0
       )
     ).toBe(
@@ -357,8 +301,7 @@ IF hit == TRUE
 
     expect(
       prettyText(
-        parse(
-          tokenize(`
+        parse(`
 REPLACE ImportDefaultSpecifier[local.name == 'css']
 WITH ImportDefaultSpecifier(Identifier('styles'))
 AND
@@ -368,8 +311,7 @@ AND
 
 IF hit == TRUE
     print('success!')
-`)
-        ),
+`),
         0
       )
     ).toBe(

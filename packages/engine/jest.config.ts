@@ -4,7 +4,7 @@ const config: Config.InitialOptions = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   moduleNameMapper: {
-    '^engine/(.*)$': '<rootDir>/packages/engine/src/$1',
+    '^src/(.*)$': '<rootDir>/src/$1',
   }
 };
 export default config;

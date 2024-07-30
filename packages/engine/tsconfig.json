@@ -1,8 +1,14 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "outDir": "../../dist/packages/engine",
+    "rootDir": ".",
+    "baseUrl": ".",
+    "outDir": "./dist",
+    "declaration": true,
+    "paths": {
+      "src/*": ["src/*"]
+    }
   },
-  "include": ["src/**/*", "tests/**/*"],
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }
