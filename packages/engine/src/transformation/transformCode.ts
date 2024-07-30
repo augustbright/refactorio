@@ -1,7 +1,7 @@
 import { Readable } from 'stream';
 
+import { withStreamLogger } from '../logger/withStreamLogger';
 import { parseScript } from '../utils/parseScript';
-import { withStreamResult } from '../utils/withStreamResult';
 import { TGlobalContext, TParser, TScriptDefinition } from './types';
 
 import {
@@ -24,7 +24,7 @@ type TTransformCodeResult = {
   code: string;
 };
 
-export const transformCode = withStreamResult(
+export const transformCode = withStreamLogger(
   async (
     out: Readable,
     {

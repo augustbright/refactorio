@@ -1,6 +1,6 @@
 import { readFile } from 'fs/promises';
 
-import { withStreamResult } from '../utils/withStreamResult';
+import { withStreamLogger } from '../logger/withStreamLogger';
 import { transformCode } from './transformCode';
 import { TParser, TScriptDefinition } from './types';
 
@@ -15,14 +15,14 @@ type TTransformFileResult = {
   code: string;
 };
 
-export const transformFile = withStreamResult(
+export const transformFile = withStreamLogger(
   async (
-    out,
+    logger,
     { script, filename, parser }: TTransformFileOptions
   ): Promise<TTransformFileResult> => {
     const code = await readFile(filename, 'utf8');
 
-    const { out: codeOut, result } = transformCode({
+    const { logger: codeLogger, result } = transformCode({
       code,
       parser,
       globalContext: {
@@ -31,8 +31,8 @@ export const transformFile = withStreamResult(
       script
     });
 
-    codeOut.on('data', (chunk) => {
-      out.push(chunk);
+    codeLogger.on('data', (chunk) => {
+      logger.push(chunk);
     });
 
     return result;

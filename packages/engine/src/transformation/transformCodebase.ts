@@ -1,7 +1,7 @@
 import { GlobOptionsWithFileTypesUnset, glob } from 'glob';
 import { Readable } from 'stream';
 
-import { withStreamResult } from '../utils/withStreamResult';
+import { withStreamLogger } from '../logger/withStreamLogger';
 import { transformFile } from './transformFile';
 import { TParser, TScriptDefinition } from './types';
 
@@ -18,7 +18,7 @@ type TTransformCodebaseResult = {
   out: Readable;
 };
 
-export const transformCodebase = withStreamResult(
+export const transformCodebase = withStreamLogger(
   async (
     out: Readable,
     script: TScriptDefinition,
@@ -35,13 +35,13 @@ export const transformCodebase = withStreamResult(
 
     for (const filename of files) {
       try {
-        const { out: fileOut, result } = transformFile({
+        const { logger: fileLogger, result } = transformFile({
           script,
           filename,
           parser
         });
 
-        fileOut.on('data', (chunk) => {
+        fileLogger.on('data', (chunk) => {
           out.push(chunk);
         });
 
