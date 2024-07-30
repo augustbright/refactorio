@@ -1,3 +1,3 @@
 #!/usr/bin/env sh
-
+echo 'RUNNING PRE-COMMIT HOOK'
 yarn lint:fix
