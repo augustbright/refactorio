@@ -1,8 +1,17 @@
 {
+  "scripts": {
+    "lint": "yarn workspaces run lint",
+    "lint:fix": "yarn workspaces run lint:fix",
+    "test": "yarn workspaces run test",
+    "prepare": "husky install"
+  },
   "private": true,
   "workspaces": {
     "packages": [
       "packages/*"
     ]
+  },
+  "devDependencies": {
+    "husky": "^7.0.0"
   }
 }

@@ -8,7 +8,7 @@ import {
   TSelectorPattern,
   TStatement
 } from './types/ast';
-import { TToken, TTokenType } from './types/tokens';
+import { TTokenType } from './types/tokens';
 
 class SyntaxError extends Error {
   constructor(message?: string) {

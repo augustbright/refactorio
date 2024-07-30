@@ -9,8 +9,7 @@
     "test": "jest",
     "lint": "eslint 'src/**/*.{ts,js}'",
     "lint:fix": "eslint 'src/**/*.{ts,js}' --fix",
-    "compile": "tsc -p ./ --project tsconfig.build.json",
-    "prepare": "husky"
+    "compile": "tsc -p ./ --project tsconfig.build.json"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
@@ -23,11 +22,8 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.8.0",
-    "husky": "^9.1.4",
     "jest": "^29.7.0",
-    "lint-staged": "^15.2.7",
     "prettier": "^3.3.3",
-    "prettier-plugin-organize-imports": "^4.0.0",
     "ts-jest": "^29.2.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.5.4",
