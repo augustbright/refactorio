@@ -13,6 +13,6 @@ export default [
   ...tseslint.configs.recommended,
   eslintPluginPrettierRecommended,
   {
-    ignores: ['**/mock-repo/**/*']
+    ignores: ['**/mock-repo/**/*', '**/dist/**/*']
   }
 ];
