@@ -1,4 +1,8 @@
-import { TCommonNode, TOperator, TSelectorPattern } from '@refactorio/engine/src/types/ast';
+import {
+  TCommonNode,
+  TOperator,
+  TSelectorPattern
+} from '@refactorio/engine/src/types/ast';
 import { AssertTrue, Equals } from '@refactorio/engine/src/types/utils';
 
 const OPERATOR_VIEW: Record<TOperator, string> = {

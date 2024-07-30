@@ -4,14 +4,15 @@ import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended'
 import globals from 'globals';
 import tseslint from 'typescript-eslint';
 
-/** @type import("@types/eslint").Linter.Config[] */
 export default [
   {
-    files: ['**/*.{js,mjs,cjs,ts}'],
-    excludedFiles: ['/out/**/*']
+    files: ['**/*.{js,mjs,cjs,ts}']
   },
   { languageOptions: { globals: globals.node } },
   pluginJs.configs.recommended,
   ...tseslint.configs.recommended,
-  eslintPluginPrettierRecommended
+  eslintPluginPrettierRecommended,
+  {
+    ignores: ['**/mock-repo/**/*']
+  }
 ];
