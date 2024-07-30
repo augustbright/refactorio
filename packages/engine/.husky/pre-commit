@@ -1,4 +1,6 @@
 #!/bin/sh
+
+echo "RUNNING PRE-COMMIT HOOK"
 . "$(dirname "$0")/_/husky.sh"
 
 
