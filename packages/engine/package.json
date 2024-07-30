@@ -8,7 +8,8 @@
     "dev": "ts-node src/index.ts",
     "test": "jest",
     "lint": "eslint 'src/**/*.{ts,js}'",
-    "compile": "tsc -p ./ --project tsconfig.build.json"
+    "compile": "tsc -p ./ --project tsconfig.build.json",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^9.8.0",
@@ -21,6 +22,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "globals": "^15.8.0",
+    "husky": "^9.1.4",
     "jest": "^29.7.0",
     "prettier": "^3.3.3",
     "prettier-plugin-organize-imports": "^4.0.0",
