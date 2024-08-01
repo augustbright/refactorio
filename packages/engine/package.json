@@ -41,10 +41,8 @@
   },
   "lint-staged": {
     "**/*": [
-      "prettify",
-      "lint:fix",
-      "checkTypes",
-      "git add"
+      "prettier --write",
+      "eslint --fix"
     ]
   }
 }
