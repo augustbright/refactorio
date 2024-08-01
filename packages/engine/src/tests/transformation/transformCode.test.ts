@@ -1,13 +1,13 @@
 import * as parser from 'recast/parsers/babel-ts.js';
-import { connectable, filter } from 'rxjs';
+import { connectable } from 'rxjs';
 
 import { mockObserver, sleep, waitUntilComplete } from '../testUtils';
 
-import { AbstractLogEntry } from 'src/logger/entry/abstract';
+import { TAnyEntry } from 'src/logger/entry';
 import { LogEntry } from 'src/logger/entry/implementations';
 import { transformCode } from 'src/transformation';
 import { TransformCodeResult } from 'src/transformation/transformCode';
-import { instancesOf } from 'src/utils/rx/takeResults';
+import { filterLogs, filterResult, instancesOf } from 'src/utils/rx/operators';
 
 describe('transformCode', () => {
   test('returns observable logs, result', async () => {
@@ -23,15 +23,11 @@ print('How are you?')
       })
     );
 
-    const logObserver = mockObserver<AbstractLogEntry>();
+    const logObserver = mockObserver<TAnyEntry>();
     const resultObserver = mockObserver<TransformCodeResult>();
 
-    transformCode$
-      .pipe(filter((entry) => entry instanceof AbstractLogEntry))
-      .subscribe(logObserver);
-    transformCode$
-      .pipe(filter((entry) => entry instanceof TransformCodeResult))
-      .subscribe(resultObserver);
+    transformCode$.pipe(filterLogs()).subscribe(logObserver);
+    transformCode$.pipe(filterResult()).subscribe(resultObserver);
 
     transformCode$.connect();
 

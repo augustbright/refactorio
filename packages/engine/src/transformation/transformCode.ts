@@ -11,7 +11,8 @@ import {
   TObjectLiteral,
   TStatement
 } from 'src/types';
-import { AssertTrue, Equals } from 'src/types/utils';
+import { ObservableResult } from 'src/types/rx';
+import { UnreachableCaseError } from 'src/utils/UnreachableCaseError';
 
 type TTransformCodeOptions = {
   code: string;
@@ -20,9 +21,10 @@ type TTransformCodeOptions = {
   globalContext: TGlobalContext;
 };
 
-export class TransformCodeResult {
-  constructor(public readonly data: { isChanged: boolean; code: string }) {}
-}
+export class TransformCodeResult extends ObservableResult<{
+  isChanged: boolean;
+  code: string;
+}> {}
 
 export const transformCode = ({
   code,
@@ -150,8 +152,7 @@ export const transformCode = ({
       } else if (expression.operator === 'OR') {
         return left || right;
       } else {
-        true as AssertTrue<Equals<typeof expression.operator, never>>;
-        throw new Error(`Unknown operator type: ${expression.operator}`);
+        throw new UnreachableCaseError(expression.operator);
       }
     };
 
@@ -172,9 +173,7 @@ export const transformCode = ({
         case 'ObjectLiteral':
           return object(expression);
         default:
-          true as AssertTrue<Equals<typeof expression, never>>;
-          // @ts-expect-error expression should be of type "never"
-          throw new Error(`Unknown expression type: ${expression.type}`);
+          throw new UnreachableCaseError(expression);
       }
     };
 
@@ -217,9 +216,7 @@ export const transformCode = ({
         case 'ReplaceStatement':
           throw 'not implemented';
         default:
-          true as AssertTrue<Equals<typeof statement, never>>;
-          // @ts-expect-error statement should be of type "never"
-          throw new Error(`Unknown statement type: ${statement.type}`);
+          throw new UnreachableCaseError(statement);
       }
     };
 

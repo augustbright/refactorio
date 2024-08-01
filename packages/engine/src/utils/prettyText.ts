@@ -3,7 +3,8 @@ import {
   TOperator,
   TSelectorPattern
 } from '@refactorio/engine/src/types/ast';
-import { AssertTrue, Equals } from '@refactorio/engine/src/types/utils';
+
+import { UnreachableCaseError } from './UnreachableCaseError';
 
 const OPERATOR_VIEW: Record<TOperator, string> = {
   PLUS: '+',
@@ -92,8 +93,6 @@ export const prettyText = (node: TCommonNode, level: number): string => {
         `}`
       );
     default:
-      true as AssertTrue<Equals<typeof node, never>>;
-      //@ts-expect-error type of node should be never by default
-      return `<UNKNOWN NODE: ${node.type}>`;
+      throw new UnreachableCaseError(node);
   }
 };
