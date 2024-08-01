@@ -1,5 +1,6 @@
 #!/bin/sh
 . "$(dirname "$0")/_/husky.sh"
 
+yarn workspaces run prettify
 yarn workspaces run lint:fix
 yarn workspaces run checkTypes
