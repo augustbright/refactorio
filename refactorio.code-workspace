@@ -14,6 +14,14 @@
 		}
 	],
 	"settings": {
-		"jestrunner.changeDirectoryToWorkspaceRoot": true
+		"jestrunner.changeDirectoryToWorkspaceRoot": true,
+		"editor.formatOnSave": true,
+		"editor.defaultFormatter": "esbenp.prettier-vscode",
+		"typescript.format.semicolons": "insert",
+		"editor.codeActionsOnSave": {
+			"source.fixAll.eslint": "explicit"
+		},
+		"eslint.format.enable": true,
+		"eslint.useFlatConfig": true
 	}
 }
