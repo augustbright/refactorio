@@ -36,11 +36,15 @@ print('How are you?')
 
     await sleep(300);
 
-    expect(resultObserver.next).toHaveBeenCalledTimes(1);
+    expect(resultObserver.next).toHaveBeenCalledOnce();
     expect(resultObserver.next.mock.calls[0][0]).toBeInstanceOf(
       TransformCodeResult
     );
-    expect(resultObserver.next.mock.calls[0][0].data.isChanged).toBe(false);
+
+    expect(resultObserver.next.mock.calls[0][0].data).toEqual({
+      isChanged: false
+    });
+    expect(resultObserver.next.mock.calls[0][0].data.isChanged).toBeFalse();
     expect(resultObserver.next.mock.calls[0][0].data.code).toBe(`anyCode();`);
 
     expect(logObserver.next).toHaveBeenCalledTimes(2);
@@ -51,7 +55,8 @@ print('How are you?')
     expect(logObserver.next.mock.calls[1][0].payload).toBe('How are you?');
   });
 
-  test('transforms the code usin transformation script', async () => {
+  test('transforms the code using transformation script', async () => {
+    const observer = mockObserver();
     transformCode({
       script: `
 REPLACE Identifier[name == 'bad_name'] WITH b.identifier('good_name')
@@ -61,15 +66,9 @@ REPLACE Identifier[name == 'bad_name'] WITH b.identifier('good_name')
       parser
     })
       .pipe(instancesOf(TransformCodeResult))
-      .subscribe(
-        (result) => {
-          result.data;
-        },
-        (error) => {
-          expect(error).toBeUndefined();
-        }
-      );
-    sleep(300);
+      .subscribe(observer);
+    sleep(1000);
+    expect(observer.error).not.toHaveBeenCalled();
   });
 
   test('unhandled errors', () => {

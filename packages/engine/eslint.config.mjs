@@ -1,5 +1,6 @@
 import pluginJs from '@eslint/js';
 
+import jestExtended from 'eslint-plugin-jest-extended';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
@@ -32,6 +33,7 @@ export default [
       ]
     }
   },
+  jestExtended.configs['flat/all'],
 
   {
     ignores: ['**/mock-repo/**/*', '**/dist/**/*']
