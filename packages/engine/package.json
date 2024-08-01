@@ -4,16 +4,17 @@
   "main": "./dist/src/index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node ./dist/index.js",
     "dev": "ts-node src/index.ts",
-    "build": "tsc -p ./ --project tsconfig.build.json"
+    "test": "jest",
+    "build": "tsc -p ./ --project tsconfig.build.json",
+    "start": "node ./dist/index.js"
   },
   "devDependencies": {
+    "@refactorio/config": "1.0.0",
     "@types/eslint": "^9.6.0",
     "@types/glob": "^8.1.0",
     "@types/jest": "^29.5.12",
     "@types/node": "^20.14.12",
-    "@refactorio/config": "1.0.0",
     "eslint": "^9.8.0",
     "jest": "^29.7.0",
     "jest-extended": "^4.0.2",

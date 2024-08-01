@@ -42,7 +42,8 @@ print('How are you?')
     );
 
     expect(resultObserver.next.mock.calls[0][0].data).toEqual({
-      isChanged: false
+      isChanged: false,
+      code: 'anyCode();'
     });
     expect(resultObserver.next.mock.calls[0][0].data.isChanged).toBeFalse();
     expect(resultObserver.next.mock.calls[0][0].data.code).toBe(`anyCode();`);

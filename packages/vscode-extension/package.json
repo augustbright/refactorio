@@ -53,7 +53,8 @@
   "scripts": {
     "vscode:prepublish": "yarn run compile",
     "build": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
+    "watch": "tsc -watch -p ./",
+    "test": "jest"
   },
   "devDependencies": {
     "@types/jest": "^29.5.12",

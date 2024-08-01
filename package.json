@@ -3,7 +3,7 @@
     "prettify": "yarn workspaces run prettier . --write",
     "lint": "yarn workspaces run eslint .",
     "lint:fix": "yarn workspaces run eslint . --fix",
-    "test": "yarn workspaces run jest",
+    "test": "yarn workspaces run test",
     "checkTypes": "yarn workspaces run tsc --noEmit --project tsconfig.json",
     "prepare": "husky install"
   },

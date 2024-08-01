@@ -27,6 +27,9 @@
 		},
 		"eslint.format.enable": true,
 		"eslint.useFlatConfig": true,
-		"js/ts.implicitProjectConfig.checkJs": true
+		"js/ts.implicitProjectConfig.checkJs": true,
+		"[json]": {
+			"editor.defaultFormatter": "esbenp.prettier-vscode"
+		},
 	}
 }
