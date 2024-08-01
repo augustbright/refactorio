@@ -1,8 +1,10 @@
 {
   "scripts": {
-    "lint": "yarn workspaces run lint",
-    "lint:fix": "yarn workspaces run lint:fix",
-    "test": "yarn workspaces run test",
+    "prettify": "yarn workspaces run prettier . --write",
+    "lint": "yarn workspaces run eslint .",
+    "lint:fix": "yarn workspaces run eslint . --fix",
+    "test": "yarn workspaces run jest",
+    "checkTypes": "yarn workspaces run tsc --noEmit --project tsconfig.json",
     "prepare": "husky install"
   },
   "private": true,

@@ -32,7 +32,7 @@ describe('LoggerOutput', () => {
     push(new WarnEntry('some warning'));
     await sleep(10);
 
-    expect(handleErrorData).toHaveBeenCalledTimes(1);
+    expect(handleErrorData).toHaveBeenCalledOnce();
     expect(handleErrorAndWarnData).toHaveBeenCalledTimes(2);
     expect(handleAllData).toHaveBeenCalledTimes(3);
   });

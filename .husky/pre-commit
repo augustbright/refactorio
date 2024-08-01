@@ -2,4 +2,4 @@
 . "$(dirname "$0")/_/husky.sh"
 
 yarn workspaces run lint-staged
-yarn workspaces run checkTypes
+yarn checkTypes

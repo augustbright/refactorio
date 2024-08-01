@@ -23,7 +23,7 @@ describe('withStreamLogger', () => {
 
     await sleep(10);
 
-    expect(listener).toHaveBeenCalledTimes(1);
+    expect(listener).toHaveBeenCalledOnce();
     expect(listener.mock.calls[0][0].payload).toBe('message 1');
 
     await sleep(100);
@@ -38,7 +38,7 @@ describe('withStreamLogger', () => {
 
     await sleep(10);
 
-    expect(all.closed).toBe(true);
+    expect(all.closed).toBeTrue();
   });
 
   test("stream keeps data until is's read", async () => {
@@ -62,7 +62,7 @@ describe('withStreamLogger', () => {
 
     await sleep(10);
 
-    expect(all.closed).toBe(false);
+    expect(all.closed).toBeFalse();
 
     const listener = jest.fn();
     all.on('data', listener);
@@ -71,6 +71,6 @@ describe('withStreamLogger', () => {
 
     expect(listener).toHaveBeenCalledTimes(3);
 
-    expect(all.closed).toBe(true);
+    expect(all.closed).toBeTrue();
   });
 });

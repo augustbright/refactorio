@@ -9,6 +9,10 @@
 			"path": "packages/vscode-extension"
 		},
 		{
+			"name": "config",
+			"path": "packages/config"
+		},
+		{
 			"name": "refactorio",
 			"path": "."
 		}
@@ -22,6 +26,7 @@
 			"source.fixAll.eslint": "explicit"
 		},
 		"eslint.format.enable": true,
-		"eslint.useFlatConfig": true
+		"eslint.useFlatConfig": true,
+		"js/ts.implicitProjectConfig.checkJs": true
 	}
 }
