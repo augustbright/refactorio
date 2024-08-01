@@ -3,7 +3,6 @@
     "arrowParens": "always",
     "bracketSameLine": false,
     "bracketSpacing": true,
-    "editorconfig": true,
     "embeddedLanguageFormatting": "auto",
     "singleAttributePerLine": true,
     "trailingComma": "none",
