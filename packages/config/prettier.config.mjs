@@ -1,6 +1,17 @@
 /** @type import('prettier').Config */
 export default {
-  plugins: ['@trivago/prettier-plugin-sort-imports'],
+  overrides: [
+    {
+      files: ['**/*'],
+      excludeFiles: ['**/*.d.ts'],
+      options: {
+        plugins: ['@trivago/prettier-plugin-sort-imports'],
+        importOrder: ['^@', '<THIRD_PARTY_MODULES>', '^[./]', '^src/'],
+        importOrderSeparation: true,
+        importOrderSortSpecifiers: true
+      }
+    }
+  ],
   arrowParens: 'always',
   bracketSameLine: false,
   bracketSpacing: true,
@@ -8,8 +19,5 @@ export default {
   singleAttributePerLine: true,
   trailingComma: 'none',
   singleQuote: true,
-  jsxSingleQuote: true,
-  importOrder: ['^@', '<THIRD_PARTY_MODULES>', '^[./]', '^src/'],
-  importOrderSeparation: true,
-  importOrderSortSpecifiers: true
+  jsxSingleQuote: true
 };

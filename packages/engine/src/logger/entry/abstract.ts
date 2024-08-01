@@ -4,7 +4,7 @@ import { TEntryFilter } from '.';
 import { LogEntryJSON } from './serialization';
 import { LogLevel } from './types';
 
-export abstract class AbstractLogEntry<Payload> {
+export abstract class AbstractLogEntry<Payload = unknown> {
   abstract type: string;
   abstract level: LogLevel;
   readonly timestamp: string;

@@ -1,9 +1,10 @@
 import * as parser from 'recast/parsers/babel-ts.js';
 import { connectable, filter } from 'rxjs';
 
-import { mockObserver, sleep } from '../testUtils';
+import { mockObserver, sleep, waitUntilComplete } from '../testUtils';
 
 import { AbstractLogEntry } from 'src/logger/entry/abstract';
+import { LogEntry } from 'src/logger/entry/implementations';
 import { transformCode } from 'src/transformation';
 import { TransformCodeResult } from 'src/transformation/transformCode';
 import { instancesOf } from 'src/utils/rx/takeResults';
@@ -22,8 +23,8 @@ print('How are you?')
       })
     );
 
-    const logObserver = mockObserver();
-    const resultObserver = mockObserver();
+    const logObserver = mockObserver<AbstractLogEntry>();
+    const resultObserver = mockObserver<TransformCodeResult>();
 
     transformCode$
       .pipe(filter((entry) => entry instanceof AbstractLogEntry))
@@ -34,26 +35,16 @@ print('How are you?')
 
     transformCode$.connect();
 
-    await sleep(300);
+    await waitUntilComplete(resultObserver);
 
-    expect(resultObserver.next).toHaveBeenCalledOnce();
-    expect(resultObserver.next.mock.calls[0][0]).toBeInstanceOf(
-      TransformCodeResult
+    expect(resultObserver).toReceive(
+      new TransformCodeResult({ isChanged: false, code: 'anyCode();' })
     );
 
-    expect(resultObserver.next.mock.calls[0][0].data).toEqual({
-      isChanged: false,
-      code: 'anyCode();'
-    });
-    expect(resultObserver.next.mock.calls[0][0].data.isChanged).toBeFalse();
-    expect(resultObserver.next.mock.calls[0][0].data.code).toBe(`anyCode();`);
-
-    expect(logObserver.next).toHaveBeenCalledTimes(2);
-    expect(logObserver.next.mock.calls[0][0]).toBeInstanceOf(AbstractLogEntry);
-    expect(logObserver.next.mock.calls[0][0].payload).toBe('Hello world!');
-
-    expect(logObserver.next.mock.calls[1][0]).toBeInstanceOf(AbstractLogEntry);
-    expect(logObserver.next.mock.calls[1][0].payload).toBe('How are you?');
+    expect(logObserver).toReceive(
+      new LogEntry('Hello world!'),
+      new LogEntry('How are you?')
+    );
   });
 
   test('transforms the code using transformation script', async () => {
