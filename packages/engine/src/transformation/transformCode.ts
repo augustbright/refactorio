@@ -1,7 +1,10 @@
-import { withStreamLogger } from '../logger/withStreamLogger';
+import { Observable, concatMap, from } from 'rxjs';
+
 import { parseScript } from '../utils/parseScript';
 import { TGlobalContext, TParser, TScriptDefinition } from './types';
 
+import { TAnyEntry } from 'src/logger/entry';
+import { LogEntry } from 'src/logger/entry/implementations';
 import {
   TBinaryExpression,
   TExpression,
@@ -17,26 +20,23 @@ type TTransformCodeOptions = {
   globalContext: TGlobalContext;
 };
 
-type TTransformCodeResult = {
-  isChanged: boolean;
-  code: string;
-};
+export class TransformCodeResult {
+  constructor(public readonly data: { isChanged: boolean; code: string }) {}
+}
 
-export const transformCode = withStreamLogger(
-  async (
-    logger,
-    {
-      code,
-      // parser,
-      script,
-      globalContext
-    }: TTransformCodeOptions
-  ): Promise<TTransformCodeResult> => {
+export const transformCode = ({
+  code,
+  script,
+  globalContext
+}: TTransformCodeOptions) =>
+  new Observable<TAnyEntry | TransformCodeResult>((subscriber) => {
     // const ast = parse(code, { parser });
     // const changed = false;
+
+    // build-ins, not global.
     const globals: Record<string, unknown> = {
       print: (text: string) => {
-        logger.log(text);
+        subscriber.next(new LogEntry(text));
       },
       context: globalContext
     } as const;
@@ -44,9 +44,11 @@ export const transformCode = withStreamLogger(
 
     const declare = ({ name, value }: { name: string; value: unknown }) => {
       if (name in globals)
-        throw new Error(`Cannot redeclare global identifier '${name}'`);
+        subscriber.error(
+          new Error(`Cannot redeclare global identifier '${name}'`)
+        );
       if (name in declarations)
-        throw new Error(`Identifier '${name}' is already declared`);
+        subscriber.error(new Error(`Identifier '${name}' is already declared`));
 
       declarations[name] = value;
     };
@@ -223,11 +225,20 @@ export const transformCode = withStreamLogger(
 
     const program = parseScript(script);
 
-    await Promise.all(program.body.map(evaluateStatement));
+    const subscription = from(program.body)
+      .pipe(concatMap((statement) => from(evaluateStatement(statement))))
+      .subscribe({
+        complete() {
+          subscriber.next(new TransformCodeResult({ code, isChanged: false }));
+          subscriber.complete();
+        },
+        error(error) {
+          subscriber.error(error);
+        },
+        next() {}
+      });
 
-    return {
-      isChanged: false,
-      code
+    return function teardown() {
+      subscription.unsubscribe();
     };
-  }
-);
+  });

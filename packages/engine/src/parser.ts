@@ -22,13 +22,15 @@ export function parse(code: string) {
   let current = 0;
   let indentation = 0;
 
+  function tokenIs(tokenType: TTokenType | TTokenType[]) {
+    return tokens[current] && [tokenType].flat().includes(tokens[current].type);
+  }
+
   function expectTokenType(
     tokenType: TTokenType | TTokenType[],
     errorMessage: string
   ) {
-    const matches = [tokenType]
-      .flat()
-      .some((tokenType) => tokens[current].type === tokenType);
+    const matches = [tokenType].flat().some(tokenIs);
 
     if (!matches) {
       throw new SyntaxError(`${errorMessage}, got: "${tokens[current].value}"`);
@@ -36,27 +38,20 @@ export function parse(code: string) {
   }
 
   function skipSpace() {
-    while (
-      tokens[current]?.type === 'NEWLINE' ||
-      tokens[current]?.type === 'INDENTATION'
-    ) {
-      current++;
-    }
+    while (tokenIs(['NEWLINE', 'INDENTATION'])) current++;
   }
 
   function skipNewline() {
-    while (tokens[current] && tokens[current].type === 'NEWLINE') {
-      current++;
-    }
+    while (tokenIs('NEWLINE')) current++;
   }
 
   function currentIntendedTokenIs(
     requiredIndentation: number,
-    tokenType: string
+    tokenType: TTokenType
   ) {
-    if (!requiredIndentation) return tokens[current].type === tokenType;
+    if (!requiredIndentation) return tokenIs(tokenType);
     if (
-      tokens[current].type === 'INDENTATION' &&
+      tokenIs('INDENTATION') &&
       tokens[current].value.length === requiredIndentation &&
       tokens[current + 1] &&
       tokens[current + 1].type === tokenType
@@ -92,7 +87,7 @@ export function parse(code: string) {
         ['COMMA', 'RSB'],
         'Unexpected token found while parsing selector pattern filter'
       );
-      if (tokens[current].type === 'COMMA') current++;
+      if (tokenIs('COMMA')) current++;
     }
     current++;
 
@@ -105,7 +100,7 @@ export function parse(code: string) {
     current++;
 
     let filter: TExpression[] | undefined;
-    if (tokens[current].type === 'LSB') {
+    if (tokenIs('LSB')) {
       filter = parsePatternFilter();
     }
 
@@ -118,7 +113,7 @@ export function parse(code: string) {
 
   function parseSelectorPatterns(): TSelectorPattern[] {
     const patterns: TSelectorPattern[] = [];
-    while (tokens[current].type === 'IDENTIFIER') {
+    while (tokenIs('IDENTIFIER')) {
       const pattern = parseSelectorPattern();
       patterns.push(pattern);
     }
@@ -130,15 +125,13 @@ export function parse(code: string) {
     const result: TExpression[] = [];
     while (tokens[current].type !== 'RPAREN') {
       result.push(parseExpression());
-      if (
-        tokens[current].type !== 'COMMA' &&
-        tokens[current].type !== 'RPAREN'
-      ) {
+
+      if (!tokenIs(['COMMA', 'RPAREN'])) {
         throw new SyntaxError(
           `Unexpected token found while parsing function arguments: ${tokens[current].value}`
         );
       }
-      if (tokens[current].type === 'COMMA') current++;
+      if (tokenIs('COMMA')) current++;
     }
     current++;
     return result;
@@ -166,7 +159,7 @@ export function parse(code: string) {
         ['COMMA', 'RCB'],
         'Unexpected token found while parsing object literal'
       );
-      if (tokens[current].type === 'COMMA') current++;
+      if (tokenIs('COMMA')) current++;
       map[key] = expression;
     }
     current++;
@@ -231,11 +224,8 @@ export function parse(code: string) {
     let expression = parsePrimaryExpression();
 
     //TODO computed member
-    while (
-      tokens[current] &&
-      (tokens[current].type === 'DOT' || tokens[current].type === 'LPAREN')
-    ) {
-      if (tokens[current].type === 'DOT') {
+    while (tokenIs(['DOT', 'LPAREN'])) {
+      if (tokenIs('DOT')) {
         const property = tokens[current].value;
         current++;
         expression = {
@@ -335,7 +325,7 @@ export function parse(code: string) {
         tokens[current].type !== 'INDENTATION'
       );
 
-      if (tokens[current] && tokens[current].type === 'NEWLINE') {
+      if (tokenIs('NEWLINE')) {
         skipNewline();
       }
     }
@@ -462,10 +452,7 @@ export function parse(code: string) {
   }
 
   function parseRootStatement(): TStatement {
-    skipNewline();
-    if (tokens[current].type === 'INDENTATION') {
-      throw new SyntaxError('Unexpected indentation');
-    }
+    if (tokenIs('INDENTATION')) throw new SyntaxError('Unexpected indentation');
 
     return parseCommonStatement();
   }
@@ -473,7 +460,9 @@ export function parse(code: string) {
   function parseProgram(): TProgram {
     const body = [];
 
-    while (current < tokens.length) {
+    while (true) {
+      skipNewline();
+      if (current >= tokens.length) break;
       body.push(parseRootStatement());
     }
 

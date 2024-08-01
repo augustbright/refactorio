@@ -318,4 +318,12 @@ IF hit == TRUE
       `REPLACE ImportDefaultSpecifier[(local.name == 'css')] WITH ImportDefaultSpecifier(Identifier('styles')) AND {REPLACE Identifier[(name == 'css')] WITH Identifier('styles') AND hit = TRUE};IF (hit == TRUE) {print('success!')}`
     );
   });
+  test('test', () => {
+    expect(() =>
+      parse(`
+print('Hello world!')
+print('How are you?')
+`)
+    ).not.toThrow();
+  });
 });

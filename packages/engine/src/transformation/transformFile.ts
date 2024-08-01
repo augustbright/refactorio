@@ -22,7 +22,7 @@ export const transformFile = withStreamLogger(
   ): Promise<TTransformFileResult> => {
     const code = await readFile(filename, 'utf8');
 
-    const { output: codeOutput, result } = transformCode({
+    const codeTransformation$ = transformCode({
       code,
       parser,
       globalContext: {
@@ -31,8 +31,9 @@ export const transformFile = withStreamLogger(
       script
     });
 
-    codeOutput.filtered({}).on('data', logger.push);
+    // codeOutput.filtered({}).on('data', logger.push);
 
-    return result;
+    return { code, isChanged: false };
+    // return codeTransformation$;
   }
 );

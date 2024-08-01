@@ -8,13 +8,12 @@ export abstract class AbstractLogEntry<Payload> {
   abstract type: string;
   abstract level: LogLevel;
   readonly timestamp: string;
-  readonly payload: Payload;
 
-  constructor(payload: Payload) {
+  constructor(public readonly payload: Payload) {
     this.timestamp = new Date().toISOString();
-    this.payload = payload;
   }
 
+  // FIXME this shoudn't be here
   matches(filter: TEntryFilter) {
     return (['level', 'type'] as const).every((filterKey) => {
       if (!(filterKey in filter)) return true;
@@ -24,6 +23,7 @@ export abstract class AbstractLogEntry<Payload> {
     });
   }
 
+  // FIXME delete this
   get serialized() {
     return stringify({
       type: this.type,
@@ -33,6 +33,7 @@ export abstract class AbstractLogEntry<Payload> {
     }) as string;
   }
 
+  // FIXME delete this
   static parse(serialized: string) {
     return JSON.parse(serialized) as LogEntryJSON;
   }
