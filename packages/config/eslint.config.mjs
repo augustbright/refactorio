@@ -40,6 +40,8 @@ export default [
     ignores: ['**/mock-repo/**/*', '**/dist/**/*']
   },
   {
-    rules: {}
+    rules: {
+      'no-console': 'error'
+    }
   }
 ];

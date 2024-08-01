@@ -471,8 +471,6 @@ export function parse(code: string) {
       body
     };
 
-    console.log(JSON.stringify(result));
-
     return result;
   }
 
