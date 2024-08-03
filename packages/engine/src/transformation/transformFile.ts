@@ -1,13 +1,14 @@
 import { readFile } from 'fs/promises';
 
-import { withStreamLogger } from '../logger/withStreamLogger';
+import { createChildContext } from './evaluationContext';
 import { transformCode } from './transformCode';
-import { TParser, TScriptDefinition } from './types';
+import { TEvaluationContext, TParser, TScriptDefinition } from './types';
 
 type TTransformFileOptions = {
   filename: string;
   script: TScriptDefinition;
   parser: TParser;
+  context: TEvaluationContext;
 };
 
 type TTransformFileResult = {
@@ -15,25 +16,31 @@ type TTransformFileResult = {
   code: string;
 };
 
-export const transformFile = withStreamLogger(
-  async (
-    logger,
-    { script, filename, parser }: TTransformFileOptions
-  ): Promise<TTransformFileResult> => {
-    const code = await readFile(filename, 'utf8');
+export const transformFile = async ({
+  script,
+  filename,
+  parser,
+  context
+}: TTransformFileOptions): Promise<TTransformFileResult> => {
+  const code = await readFile(filename, 'utf8');
 
-    transformCode({
-      code,
-      parser,
-      globalContext: {
-        filename
+  transformCode({
+    code,
+    parser,
+    context: createChildContext(
+      context,
+      {
+        filename: { value: filename }
       },
-      script
-    });
+      {
+        freeze: true
+      }
+    ),
+    script
+  });
 
-    // codeOutput.filtered({}).on('data', logger.push);
+  // codeOutput.filtered({}).on('data', logger.push);
 
-    return { code, isChanged: false };
-    // return codeTransformation$;
-  }
-);
+  return { code, isChanged: false };
+  // return codeTransformation$;
+};

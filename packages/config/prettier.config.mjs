@@ -3,7 +3,7 @@ export default {
   overrides: [
     {
       files: ['**/*'],
-      excludeFiles: ['**/*.d.ts'],
+      excludeFiles: ['**/*.d.ts', 'setupTests.ts'],
       options: {
         plugins: ['@trivago/prettier-plugin-sort-imports'],
         importOrder: ['^@', '<THIRD_PARTY_MODULES>', '^[./]', '^src/'],

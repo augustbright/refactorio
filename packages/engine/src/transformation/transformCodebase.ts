@@ -1,14 +1,16 @@
 import { GlobOptionsWithFileTypesUnset, glob } from 'glob';
 
 import { withStreamLogger } from '../logger/withStreamLogger';
+import { createChildContext } from './evaluationContext';
 import { transformFile } from './transformFile';
-import { TParser, TScriptDefinition } from './types';
+import { TEvaluationContext, TParser, TScriptDefinition } from './types';
 
 type TTransformCodebaseOptions = {
   input: {
     files: string | string[];
     ignore: GlobOptionsWithFileTypesUnset['ignore'];
   };
+  context: TEvaluationContext;
   parser: TParser;
 };
 
@@ -20,7 +22,7 @@ export const transformCodebase = withStreamLogger(
   async (
     logger,
     script: TScriptDefinition,
-    { input, parser }: TTransformCodebaseOptions
+    { input, parser, context }: TTransformCodebaseOptions
   ): Promise<TTransformCodebaseResult> => {
     const files = await glob(input.files, {
       ignore: input.ignore,
@@ -32,15 +34,20 @@ export const transformCodebase = withStreamLogger(
 
     for (const filename of files) {
       try {
-        const { output: fileOutput, result } = transformFile({
+        const fileResult = await transformFile({
           script,
           filename,
-          parser
+          parser,
+          context: createChildContext(
+            context,
+            {},
+            {
+              freeze: true
+            }
+          )
         });
 
-        fileOutput.filtered({}).on('data', logger.push);
-
-        const { code, isChanged } = await result;
+        const { code, isChanged } = await fileResult;
         if (isChanged) {
           logger.debug(code);
           // await writeFile(file, transformed.content);
