@@ -58,8 +58,4 @@ REPLACE Identifier[name == 'bad_name'] WITH b.identifier('good_name')
     sleep(1000);
     expect(observer.error).not.toHaveBeenCalled();
   });
-
-  test('unhandled errors', () => {
-    throw 'not implemented';
-  });
 });
