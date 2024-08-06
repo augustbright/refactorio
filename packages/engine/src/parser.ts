@@ -1,3 +1,4 @@
+import { TTokenWalker } from './parsing/TTokenWalker';
 import { type TTokenType, Tokenizer } from './tokens';
 import {
   TBlock,
@@ -18,88 +19,51 @@ class SyntaxError extends Error {
 
 export function parse(code: string) {
   const tokens = new Tokenizer(code).tokenize();
-  let current = 0;
+  const walker = new TTokenWalker(tokens);
   let indentation = 0;
-
-  function tokenIs(tokenType: TTokenType | TTokenType[]) {
-    return tokens[current] && [tokenType].flat().includes(tokens[current].type);
-  }
-
-  function expectTokenType(
-    tokenType: TTokenType | TTokenType[],
-    errorMessage: string
-  ) {
-    const matches = [tokenType].flat().some(tokenIs);
-
-    if (!matches) {
-      throw new SyntaxError(`${errorMessage}, got: "${tokens[current].value}"`);
-    }
-  }
-
-  function skipSpace() {
-    while (tokenIs(['NEWLINE', 'INDENTATION'])) current++;
-  }
-
-  function skipNewline() {
-    while (tokenIs('NEWLINE')) current++;
-  }
 
   function currentIntendedTokenIs(
     requiredIndentation: number,
-    tokenType: TTokenType
+    tokenType: TTokenType | TTokenType[]
   ) {
-    if (!requiredIndentation) return tokenIs(tokenType);
+    if (!requiredIndentation) return walker.is(tokenType);
     if (
-      tokenIs('INDENTATION') &&
-      tokens[current].value.length === requiredIndentation &&
-      tokens[current + 1] &&
-      tokens[current + 1].type === tokenType
+      walker.is('INDENTATION') &&
+      walker.currentValue?.length === requiredIndentation &&
+      walker.is(tokenType, 1)
     ) {
-      current++;
+      walker.step(1);
       return true;
     }
     return false;
   }
 
-  function tokenAfterSpaceIs(tokenType: string) {
-    let i = current;
-    while (i < tokens.length) {
-      if (tokens[i]?.type === 'NEWLINE' || tokens[i]?.type === 'INDENTATION') {
-        i++;
-      } else if (tokens[i]?.type === tokenType) {
-        current = i;
-        return true;
-      } else {
-        return false;
-      }
-    }
-    return false;
-  }
-
   function parsePatternFilter(): TExpression[] {
-    expectTokenType('LSB', 'Expected pattern filter');
+    walker.assertType('LSB', 'Expected pattern filter');
     const result: TExpression[] = [];
-    current++;
-    while (tokens[current].type !== 'RSB') {
+    walker.step();
+    while (!walker.is('RSB')) {
       result.push(parseExpression());
-      expectTokenType(
+      walker.assertType(
         ['COMMA', 'RSB'],
         'Unexpected token found while parsing selector pattern filter'
       );
-      if (tokenIs('COMMA')) current++;
+      walker.skipSingle('COMMA');
     }
-    current++;
+    walker.step();
 
     return result;
   }
 
   function parseSelectorPattern(): TSelectorPattern {
-    expectTokenType('IDENTIFIER', 'Expected Selector pattern');
-    const nodeType = tokens[current].value;
-    current++;
+    const nodeType = walker.assertType(
+      'IDENTIFIER',
+      'Expected Selector pattern'
+    ).value;
+    walker.step();
 
     let filter: TExpression[] | undefined;
-    if (tokenIs('LSB')) {
+    if (walker.is('LSB')) {
       filter = parsePatternFilter();
     }
 
@@ -112,7 +76,7 @@ export function parse(code: string) {
 
   function parseSelectorPatterns(): TSelectorPattern[] {
     const patterns: TSelectorPattern[] = [];
-    while (tokenIs('IDENTIFIER')) {
+    while (walker.is('IDENTIFIER')) {
       const pattern = parseSelectorPattern();
       patterns.push(pattern);
     }
@@ -122,46 +86,47 @@ export function parse(code: string) {
 
   function parseArguments(): TExpression[] {
     const result: TExpression[] = [];
-    while (tokens[current].type !== 'RPAREN') {
+    while (!walker.is('RPAREN')) {
       result.push(parseExpression());
 
-      if (!tokenIs(['COMMA', 'RPAREN'])) {
-        throw new SyntaxError(
-          `Unexpected token found while parsing function arguments: ${tokens[current].value}`
-        );
-      }
-      if (tokenIs('COMMA')) current++;
+      walker.assertType(
+        ['COMMA', 'RPAREN'],
+        'Unexpected token found while parsing function arguments'
+      );
+      walker.skipSingle('COMMA');
     }
-    current++;
+    walker.step();
     return result;
   }
 
   function parseObjectLiteral(): TObjectLiteral {
-    expectTokenType('LCB', 'Expected object literal, but got unexpected token');
-    current++;
+    walker.assertType(
+      'LCB',
+      'Expected object literal, but got unexpected token'
+    );
+    walker.step();
     const map: TObjectLiteral['map'] = {};
 
-    while (tokens[current].type !== 'RCB') {
-      expectTokenType(
+    while (!walker.is('RCB')) {
+      const key = walker.assertType(
         'IDENTIFIER',
         'Expected object literal, but got unexpected token'
-      );
+      ).value;
 
-      const key = tokens[current].value;
-      current++;
+      walker.step();
 
-      expectTokenType('COLON', 'Expected ":", but got');
-      current++;
+      walker.assertType('COLON', 'Expected ":", but got');
+      walker.step();
 
       const expression = parseExpression();
-      expectTokenType(
+      walker.assertType(
         ['COMMA', 'RCB'],
         'Unexpected token found while parsing object literal'
       );
-      if (tokenIs('COMMA')) current++;
+      walker.skipSingle('COMMA');
       map[key] = expression;
     }
-    current++;
+    walker.step();
 
     return {
       type: 'ObjectLiteral',
@@ -170,49 +135,45 @@ export function parse(code: string) {
   }
 
   function parsePrimaryExpression(): TExpression {
-    const token = tokens[current];
-
-    if (token.type === 'IDENTIFIER') {
-      current++;
-      return {
-        type: 'Identifier',
-        name: token.value
-      };
+    const token = walker.current;
+    if (!token) {
+      throw new SyntaxError('Unexpected end of input');
     }
 
-    if (token.type === 'BOOLEAN') {
-      current++;
-      return {
-        type: 'Literal',
-        value: token.value === 'TRUE'
-      };
-    }
-
-    if (token.type === 'NUMBER') {
-      current++;
-      return {
-        type: 'Literal',
-        value: Number(token.value)
-      };
-    }
-
-    if (token.type === 'STRING') {
-      current++;
-      return {
-        type: 'Literal',
-        value: token.value.slice(1, -1)
-      };
-    }
-
-    if (token.type === 'LCB') {
-      return parseObjectLiteral();
+    switch (token.type) {
+      case 'IDENTIFIER':
+        walker.step();
+        return {
+          type: 'Identifier',
+          name: token.value
+        };
+      case 'BOOLEAN':
+        walker.step();
+        return {
+          type: 'Literal',
+          value: token.value === 'TRUE'
+        };
+      case 'NUMBER':
+        walker.step();
+        return {
+          type: 'Literal',
+          value: Number(token.value)
+        };
+      case 'STRING':
+        walker.step();
+        return {
+          type: 'Literal',
+          value: token.value.slice(1, -1)
+        };
+      case 'LCB':
+        return parseObjectLiteral();
     }
 
     if (token.type === 'LPAREN') {
-      current++;
+      walker.step();
       const expression = parseExpression();
-      expectTokenType('RPAREN', 'Expected closing parenthesis');
-      current++;
+      walker.assertType('RPAREN', 'Expected closing parenthesis');
+      walker.step();
       return expression;
     }
 
@@ -223,10 +184,13 @@ export function parse(code: string) {
     let expression = parsePrimaryExpression();
 
     //TODO computed member
-    while (tokenIs(['DOT', 'LPAREN'])) {
-      if (tokenIs('DOT')) {
-        const property = tokens[current].value;
-        current++;
+    while (walker.is(['DOT', 'LPAREN'])) {
+      if (walker.is('DOT')) {
+        const property = walker.currentValue;
+        if (!property) {
+          throw new SyntaxError('Expected property name');
+        }
+        walker.step();
         expression = {
           type: 'MemberExpression',
           object: expression,
@@ -234,8 +198,8 @@ export function parse(code: string) {
         };
       }
 
-      if (tokens[current]?.type === 'LPAREN') {
-        current++;
+      if (walker.is('LPAREN')) {
+        walker.step();
         expression = {
           type: 'CallExpression',
           callee: expression,
@@ -251,18 +215,18 @@ export function parse(code: string) {
     left: TExpression,
     minPrecedence: number
   ): TExpression {
-    let lookahead = tokens[current];
+    let lookahead = walker.current;
     while (lookahead && getPrecedence(lookahead.type) >= minPrecedence) {
       const operator = lookahead;
-      current++;
+      walker.step();
       let right = parseMemberExpression();
-      lookahead = tokens[current];
+      lookahead = walker.current;
       while (
         lookahead &&
         getPrecedence(lookahead.type) > getPrecedence(operator.type)
       ) {
         right = parseBinaryExpression(right, getPrecedence(lookahead.type));
-        lookahead = tokens[current];
+        lookahead = walker.current;
       }
       left = {
         type: 'BinaryExpression',
@@ -303,9 +267,12 @@ export function parse(code: string) {
   function parseBlock(blockIndentation: number): TBlock {
     const body = [];
 
-    while (current < tokens.length) {
-      const token = tokens[current];
-      if (tokens[current].type !== 'INDENTATION') {
+    while (!walker.done) {
+      const token = walker.current;
+      if (!token) {
+        throw new SyntaxError('Unexpected end of input');
+      }
+      if (!walker.is('INDENTATION')) {
         indentation = 0;
         break;
       }
@@ -313,20 +280,17 @@ export function parse(code: string) {
         indentation = token.value.length;
         break;
       }
-      current++;
+      walker.step();
 
       do {
         body.push(parseCommonStatement());
       } while (
-        current < tokens.length &&
+        !walker.done &&
         indentation >= blockIndentation &&
-        tokens[current].type !== 'NEWLINE' &&
-        tokens[current].type !== 'INDENTATION'
+        !walker.is(['INDENTATION', 'NEWLINE'])
       );
 
-      if (tokenIs('NEWLINE')) {
-        skipNewline();
-      }
+      walker.skip('NEWLINE');
     }
 
     return {
@@ -336,14 +300,16 @@ export function parse(code: string) {
   }
 
   function parseStatement(): TStatement {
-    const token = tokens[current];
-    if (token.type === 'NEWLINE') {
-      current++;
-      expectTokenType('INDENTATION', 'Expected indentation');
-      if (tokens[current].value.length <= indentation) {
+    if (walker.is('NEWLINE')) {
+      walker.step();
+      const indentationToken = walker.assertType(
+        'INDENTATION',
+        'Expected indentation'
+      );
+      if (indentationToken.value.length <= indentation) {
         throw new SyntaxError('Broken indentation');
       }
-      indentation = tokens[current].value.length;
+      indentation = indentationToken.value.length;
       return parseBlock(indentation);
     }
 
@@ -351,15 +317,17 @@ export function parse(code: string) {
   }
 
   function parseCommonStatement(): TStatement {
-    const token = tokens[current];
-    if (token.type === 'SET') {
-      current++;
+    if (walker.is('SET')) {
+      walker.step();
 
-      const name = tokens[current];
-      current++;
+      const name = walker.current;
+      if (!name) {
+        throw new SyntaxError('Expected variable name');
+      }
+      walker.step();
 
-      expectTokenType('ASSIGN', 'Expected = after variable name');
-      current++;
+      walker.assertType('ASSIGN', 'Expected = after variable name');
+      walker.step();
 
       return {
         type: 'VariableDeclaration',
@@ -367,15 +335,18 @@ export function parse(code: string) {
         value: parseExpression()
       };
     }
-    if (token.type === 'IN') {
-      current++;
+    if (walker.is('IN')) {
+      walker.step();
       const selector = parseSelectorPatterns();
 
-      expectTokenType('AS', 'Expected AS after selector');
-      current++;
+      walker.assertType('AS', 'Expected AS after selector');
+      walker.step();
 
-      const alias = tokens[current].value;
-      current++;
+      const alias = walker.currentValue;
+      if (!alias) {
+        throw new SyntaxError('Expected alias name');
+      }
+      walker.step();
       const statement = parseStatement();
       return {
         type: 'InStatement',
@@ -384,24 +355,24 @@ export function parse(code: string) {
         statement
       };
     }
-    if (token.type === 'REPLACE') {
-      current++;
+    if (walker.is('REPLACE')) {
+      walker.step();
       const selector = parseSelectorPatterns();
-      skipSpace();
+      walker.skip(['NEWLINE', 'INDENTATION']);
 
-      expectTokenType('WITH', 'Expected WITH');
-      current++;
+      walker.assertType('WITH', 'Expected WITH');
+      walker.step();
 
       const newValue = parseExpression();
 
       let andStatement: TStatement | undefined;
       let orStatement: TStatement | undefined;
-      if (tokenAfterSpaceIs('AND')) {
-        current++;
+      if (walker.skip(['INDENTATION', 'NEWLINE'], 'AND')) {
+        walker.step();
         andStatement = parseStatement();
       }
-      if (tokenAfterSpaceIs('OR')) {
-        current++;
+      if (walker.skip(['INDENTATION', 'NEWLINE'], 'OR')) {
+        walker.step();
         orStatement = parseStatement();
       }
       return {
@@ -412,17 +383,14 @@ export function parse(code: string) {
         orStatement
       };
     }
-    if (token.type === 'IF') {
+    if (walker.is('IF')) {
       const requiredIndentation = indentation;
-      current++;
+      walker.step();
       const condition = parseExpression();
       const statement = parseStatement();
       let elseStatement: TStatement | undefined;
-      if (
-        tokens[current] &&
-        currentIntendedTokenIs(requiredIndentation, 'ELSE')
-      ) {
-        current++;
+      if (currentIntendedTokenIs(requiredIndentation, 'ELSE')) {
+        walker.step();
         elseStatement = parseStatement();
       }
 
@@ -433,25 +401,28 @@ export function parse(code: string) {
         elseStatement
       };
     }
-    if (token.type === 'IDENTIFIER' && tokens[current + 1].type === 'ASSIGN') {
-      const name = token.value;
-      current++;
-      current++;
+    if (walker.is('IDENTIFIER') && walker.is('ASSIGN', 1)) {
+      const name = walker.currentValue;
+      if (!name) {
+        throw new SyntaxError('Expected variable name');
+      }
+      walker.step(2);
       return {
         type: 'Assignment',
         name,
         value: parseExpression()
       };
     }
-    if (token.type === 'IDENTIFIER' && tokens[current + 1].type !== 'ASSIGN') {
+    if (walker.is('IDENTIFIER') && !walker.is('ASSIGN', 1)) {
       return parseExpression();
     }
 
-    throw new SyntaxError(`Unexpected token: ${token.value}`);
+    throw new SyntaxError(`Unexpected token: ${walker.currentValue}`);
   }
 
   function parseRootStatement(): TStatement {
-    if (tokenIs('INDENTATION')) throw new SyntaxError('Unexpected indentation');
+    if (walker.is('INDENTATION'))
+      throw new SyntaxError('Unexpected indentation');
 
     return parseCommonStatement();
   }
@@ -460,8 +431,8 @@ export function parse(code: string) {
     const body = [];
 
     while (true) {
-      skipNewline();
-      if (current >= tokens.length) break;
+      walker.skip('NEWLINE');
+      if (walker.done) break;
       body.push(parseRootStatement());
     }
 
