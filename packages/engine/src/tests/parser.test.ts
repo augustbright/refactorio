@@ -1,4 +1,4 @@
-import { parse } from 'src/parser';
+import { parse } from 'src/parsing';
 import { prettyText } from 'src/utils/prettyText';
 
 describe('parser', () => {
