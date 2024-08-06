@@ -1,9 +1,4 @@
-import {
-  TAnyEntry,
-  TDirPayload,
-  TErrorPayload,
-  TMessagePayload
-} from './entry';
+import { TDirPayload, TErrorPayload, TMessagePayload } from './entry';
 import { LogLevel } from './entry/types';
 
 export type TTimeBreakpoint = {
@@ -26,5 +21,3 @@ export interface ILogging {
   time(label: string, breakpoints: TTimingBreakpoints): void;
   timeEnd(label: string): void;
 }
-
-export type TPushFn = (data: TAnyEntry | null) => void;

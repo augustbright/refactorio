@@ -1,4 +1,4 @@
-import { TOKEN_TYPES } from 'src/tokenizer';
+import { TOKEN_TYPES } from './TOKEN_TYPES';
 
 export type TTokenType = (typeof TOKEN_TYPES)[number]['type'];
 

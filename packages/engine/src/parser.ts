@@ -1,4 +1,4 @@
-import { tokenize } from './tokenizer';
+import { type TTokenType, Tokenizer } from './tokens';
 import {
   TBlock,
   TExpression,
@@ -8,7 +8,6 @@ import {
   TSelectorPattern,
   TStatement
 } from './types/ast';
-import { TTokenType } from './types/tokens';
 
 class SyntaxError extends Error {
   constructor(message?: string) {
@@ -18,7 +17,7 @@ class SyntaxError extends Error {
 }
 
 export function parse(code: string) {
-  const tokens = tokenize(code);
+  const tokens = new Tokenizer(code).tokenize();
   let current = 0;
   let indentation = 0;
 

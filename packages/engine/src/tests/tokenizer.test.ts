@@ -1,8 +1,8 @@
-import { tokenize } from 'src/tokenizer';
+import { Tokenizer } from 'src/tokens';
 
 describe('tokenizer', () => {
   test('generates tokens', () => {
-    expect(tokenize(`SET hit = TRUE`)).toEqual([
+    expect(new Tokenizer(`SET hit = TRUE`).tokenize()).toEqual([
       { type: 'SET', value: 'SET' },
       { type: 'IDENTIFIER', value: 'hit' },
       { type: 'ASSIGN', value: '=' },
@@ -10,8 +10,8 @@ describe('tokenizer', () => {
     ]);
 
     expect(
-      tokenize(`IF hit
-        foo()`)
+      new Tokenizer(`IF hit
+        foo()`).tokenize()
     ).toEqual([
       { type: 'IF', value: 'IF' },
       { type: 'IDENTIFIER', value: 'hit' },
