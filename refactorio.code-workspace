@@ -1,38 +1,52 @@
 {
-	"folders": [
-		{
-			"name": "engine",
-			"path": "packages/engine"
-		},
-		{
-			"name": "vscode-extension",
-			"path": "packages/vscode-extension"
-		},
-		{
-			"name": "config",
-			"path": "packages/config"
-		},
-		{
-			"name": "refactorio",
-			"path": "."
-		}
-	],
-	"settings": {
-		"jestrunner.changeDirectoryToWorkspaceRoot": true,
-		"editor.formatOnSave": true,
-		"editor.defaultFormatter": "esbenp.prettier-vscode",
-		"typescript.format.semicolons": "insert",
-		"editor.codeActionsOnSave": {
-			"source.fixAll.eslint": "explicit"
-		},
-		"eslint.format.enable": true,
-		"eslint.useFlatConfig": true,
-		"js/ts.implicitProjectConfig.checkJs": true,
-		"[json]": {
-			"editor.defaultFormatter": "esbenp.prettier-vscode"
-		},
-		"[jsonc]": {
-			"editor.defaultFormatter": "esbenp.prettier-vscode"
-		},
-	}
+    "folders": [
+        {
+            "name": "engine",
+            "path": "packages/engine",
+        },
+        {
+            "name": "vscode-extension",
+            "path": "packages/vscode-extension",
+        },
+        {
+            "name": "config",
+            "path": "packages/config",
+        },
+        {
+            "name": "refactorio",
+            "path": ".",
+        },
+    ],
+    "settings": {
+        "jestrunner.changeDirectoryToWorkspaceRoot": true,
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "typescript.format.semicolons": "insert",
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": "explicit",
+        },
+        "eslint.format.enable": true,
+        "eslint.useFlatConfig": true,
+        "js/ts.implicitProjectConfig.checkJs": true,
+        "[json]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode",
+        },
+        "[jsonc]": {
+            "editor.defaultFormatter": "esbenp.prettier-vscode",
+        },
+        "colorTabs.config": [
+            {
+                "regex": "config/.*",
+                "color": "#854D0E", // Yellow 800
+            },
+            {
+                "regex": "vscode-extension/.*",
+                "color": "#155E75", // Cyan 800
+            },
+            {
+                "regex": "engine/.*",
+                "color": "#3730A3", // Indigo 800
+            },
+        ],
+    },
 }
