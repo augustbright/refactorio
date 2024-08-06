@@ -1,5 +1,4 @@
 import path from 'path';
-import { TestScheduler } from 'rxjs/testing';
 
 export const mockRepoPath = () => {
   return path.join(process.cwd(), 'tests/mock-repo/');
@@ -7,10 +6,6 @@ export const mockRepoPath = () => {
 
 export const sleep = (ms: number) =>
   new Promise((resolve) => setTimeout(resolve, ms));
-
-export const testRx = new TestScheduler((actual, expected) => {
-  expect(actual).toEqual(expected);
-});
 
 interface IMockObserver<Value, Error> {
   next: jest.Mock<void, [Value]>;

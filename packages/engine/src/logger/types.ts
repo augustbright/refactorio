@@ -1,4 +1,3 @@
-import { LoggerOutput } from './LoggerOutput';
 import {
   TAnyEntry,
   TDirPayload,
@@ -6,11 +5,6 @@ import {
   TMessagePayload
 } from './entry';
 import { LogLevel } from './entry/types';
-
-export type TWithStreamLogger<Result> = {
-  output: LoggerOutput;
-  result: Result;
-};
 
 export type TTimeBreakpoint = {
   timeout: number;

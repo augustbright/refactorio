@@ -4,7 +4,7 @@ import {
   TDirPayload,
   TErrorPayload,
   TMessagePayload,
-  TTimimgPayload
+  TTimingPayload
 } from './types';
 
 export class DebugEntry extends AbstractLogEntry<TMessagePayload> {
@@ -42,7 +42,7 @@ export class AssertionEntry extends AbstractLogEntry<TMessagePayload> {
   readonly level = LogLevel.ERROR as const;
 }
 
-export class TimeEndEntry extends AbstractLogEntry<TTimimgPayload> {
+export class TimeEndEntry extends AbstractLogEntry<TTimingPayload> {
   readonly type = 'TIME_END' as const;
   readonly level = LogLevel.INFO as const;
 }

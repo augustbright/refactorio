@@ -1,5 +1,5 @@
-import { LoggerOutput, createLoggerOutput } from './LoggerOutput';
 import { TDirPayload, TErrorPayload, TMessagePayload } from './entry';
+import { AbstractLogEntry } from './entry/abstract';
 import {
   AssertionEntry,
   DebugEntry,
@@ -9,18 +9,9 @@ import {
   LogEntry,
   WarnEntry
 } from './entry/implementations';
-import { ILogging, TPushFn, TTimingBreakpoints } from './types';
+import { ILogging, TTimingBreakpoints } from './types';
 
 export class Logger implements ILogging {
-  readonly output: LoggerOutput;
-  push: TPushFn;
-
-  constructor() {
-    const { output, push } = createLoggerOutput();
-    this.push = push;
-    this.output = output;
-  }
-
   debug(message: TMessagePayload): void {
     this.push(new DebugEntry(message));
   }
@@ -59,9 +50,7 @@ export class Logger implements ILogging {
     this.finishTime(label);
   }
 
-  end() {
-    this.push(null);
-  }
+  private push(_entry: AbstractLogEntry): void {}
 
   private startTime(label: string, breakpoints: TTimingBreakpoints): void {
     label;

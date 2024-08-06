@@ -1,7 +1,5 @@
 import { parse, print } from 'recast';
-import { Observable, concatMap, from } from 'rxjs';
 
-import { parseScript } from '../utils/parseScript';
 import {
   createChildContext,
   declare,
@@ -10,7 +8,6 @@ import {
 } from './evaluationContext';
 import { TEvaluationContext, TParser, TScriptDefinition } from './types';
 
-import { TAnyEntry } from 'src/logger/entry';
 import {
   TBinaryExpression,
   TExpression,
@@ -19,6 +16,7 @@ import {
 } from 'src/types';
 import { ObservableResult } from 'src/types/rx';
 import { UnreachableCaseError } from 'src/utils/UnreachableCaseError';
+import { parseScript } from 'src/utils/parseScript';
 
 type TTransformCodeOptions = {
   code: string;
@@ -36,35 +34,55 @@ export const transformCode = ({
   code,
   script,
   parser,
-  context
-}: TTransformCodeOptions) =>
-  new Observable<TAnyEntry | TransformCodeResult>((subscriber) => {
-    const ast = parse(code, { parser });
-    const isChanged = false;
+  context: parentContext
+}: TTransformCodeOptions) => {
+  const ast = parse(code, { parser });
+  const isChanged = false;
 
-    const program = parseScript(script);
+  const context = createChildContext(parentContext, {});
 
-    const subscription = from(program.body)
-      .pipe(
-        concatMap((statement) => from(evaluateStatement(context, statement)))
-      )
-      .subscribe({
-        complete() {
-          subscriber.next(
-            new TransformCodeResult({ code: print(ast).code, isChanged })
-          );
-          subscriber.complete();
-        },
-        error(error) {
-          subscriber.error(error);
-        },
-        next() {}
-      });
+  const program = parseScript(script);
 
-    return function teardown() {
-      subscription.unsubscribe();
-    };
+  program.body.forEach((statement) => {
+    evaluateStatement(context, statement);
   });
+
+  return new TransformCodeResult({ code: print(ast).code, isChanged });
+};
+
+// export const transformCode = ({
+//   code,
+//   script,
+//   parser,
+//   context
+// }: TTransformCodeOptions) =>
+//   new Observable<TAnyEntry | TransformCodeResult>((subscriber) => {
+//     const ast = parse(code, { parser });
+//     const isChanged = false;
+
+//     const program = parseScript(script);
+
+//     const subscription = from(program.body)
+//       .pipe(
+//         concatMap((statement) => from(evaluateStatement(context, statement)))
+//       )
+//       .subscribe({
+//         complete() {
+//           subscriber.next(
+//             new TransformCodeResult({ code: print(ast).code, isChanged })
+//           );
+//           subscriber.complete();
+//         },
+//         error(error) {
+//           subscriber.error(error);
+//         },
+//         next() {}
+//       });
+
+//     return function teardown() {
+//       subscription.unsubscribe();
+//     };
+//   });
 
 const member = async (
   context: TEvaluationContext,

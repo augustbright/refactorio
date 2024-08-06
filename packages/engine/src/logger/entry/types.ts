@@ -8,7 +8,7 @@ export enum LogLevel {
 export type TMessagePayload = string;
 export type TDirPayload = object;
 export type TErrorPayload = string | Error;
-export type TTimimgPayload = {
+export type TTimingPayload = {
   label: string;
   timeStart: string;
   timeEnd: string;

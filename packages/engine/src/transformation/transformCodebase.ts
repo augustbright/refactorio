@@ -1,6 +1,5 @@
 import { GlobOptionsWithFileTypesUnset, glob } from 'glob';
 
-import { withStreamLogger } from '../logger/withStreamLogger';
 import { createChildContext } from './evaluationContext';
 import { transformFile } from './transformFile';
 import { TEvaluationContext, TParser, TScriptDefinition } from './types';
@@ -18,46 +17,45 @@ type TTransformCodebaseResult = {
   files: string[];
 };
 
-export const transformCodebase = withStreamLogger(
-  async (
-    logger,
-    script: TScriptDefinition,
-    { input, parser, context }: TTransformCodebaseOptions
-  ): Promise<TTransformCodebaseResult> => {
-    const files = await glob(input.files, {
-      ignore: input.ignore,
-      absolute: true
-    });
-    const codebaseResult: TTransformCodebaseResult = {
-      files: []
-    };
+export const transformCodebase = async (
+  script: TScriptDefinition,
+  { input, parser, context }: TTransformCodebaseOptions
+): Promise<TTransformCodebaseResult> => {
+  const files = await glob(input.files, {
+    ignore: input.ignore,
+    absolute: true
+  });
+  const codebaseResult: TTransformCodebaseResult = {
+    files: []
+  };
 
-    for (const filename of files) {
-      try {
-        const fileResult = await transformFile({
-          script,
-          filename,
-          parser,
-          context: createChildContext(
-            context,
-            {},
-            {
-              freeze: true
-            }
-          )
-        });
+  for (const filename of files) {
+    try {
+      const fileResult = await transformFile({
+        script,
+        filename,
+        parser,
+        context: createChildContext(
+          context,
+          {},
+          {
+            freeze: true
+          }
+        )
+      });
 
-        const { code, isChanged } = await fileResult;
-        if (isChanged) {
-          logger.debug(code);
-          // await writeFile(file, transformed.content);
-        }
-      } catch (e) {
-        logger.error(`Error transforming ${filename}: ${e}`);
+      const { code, isChanged } = await fileResult;
+      if (isChanged) {
+        // TODO Logger
+        // logger.debug(code);
+        // await writeFile(file, transformed.content);
       }
-      codebaseResult.files.push(filename);
+    } catch (e) {
+      // TODO Logger
+      // logger.error(`Error transforming ${filename}: ${e}`);
     }
-
-    return codebaseResult;
+    codebaseResult.files.push(filename);
   }
-);
+
+  return codebaseResult;
+};
