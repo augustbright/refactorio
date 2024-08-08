@@ -1,4 +1,4 @@
-import { TToken, TTokenType } from 'src/tokens';
+import { TToken, TTokenType, Tokenizer } from 'src/tokens';
 
 const ensureArray = <T>(value: T | T[]): T[] =>
   Array.isArray(value) ? value : [value];
@@ -77,5 +77,9 @@ export class TokenWalker {
 
   get done() {
     return this.currentPosition >= this.tokens.length;
+  }
+
+  static from(code: string) {
+    return new TokenWalker(new Tokenizer(code).tokenize());
   }
 }

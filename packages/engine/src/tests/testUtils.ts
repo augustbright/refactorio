@@ -1,11 +1,14 @@
 import path from 'path';
 
+import { evaluateExpression } from 'src/evaluation/evaluateExpression';
 import {
   TContextOptions,
   createDebuggingContext,
   createEvaluationContext,
   setDebugging
 } from 'src/evaluation/evaluationContext';
+import { TokenWalker } from 'src/parsing/TokenWalker';
+import { parseExpression } from 'src/parsing/parseExpression';
 
 export const mockRepoPath = () => {
   return path.join(process.cwd(), 'tests/mock-repo/');
@@ -68,4 +71,12 @@ export const createTestEvaluationContext = (
     ...options,
     parent: debuggingContext
   });
+};
+
+export const testIterate = {
+  expression: (contextDescriptor: PropertyDescriptorMap, expression: string) =>
+    evaluateExpression(
+      createTestEvaluationContext(contextDescriptor),
+      parseExpression(TokenWalker.from(expression))
+    )
 };
