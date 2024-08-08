@@ -102,9 +102,6 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
       value: parseExpression(walker)
     };
   }
-  if (walker.is('WORD') && !walker.is('ASSIGN', 1)) {
-    return parseExpression(walker);
-  }
 
-  throw new SyntaxError(`Unexpected token: ${walker.currentValue}`);
+  return parseExpression(walker);
 }

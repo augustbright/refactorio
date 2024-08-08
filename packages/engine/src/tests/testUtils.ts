@@ -1,14 +1,19 @@
 import path from 'path';
 
 import { evaluateExpression } from 'src/evaluation/evaluateExpression';
+import { evaluateProgram } from 'src/evaluation/evaluateProgram';
+import { evaluateStatement } from 'src/evaluation/evaluateStatement';
 import {
   TContextOptions,
   createDebuggingContext,
   createEvaluationContext,
   setDebugging
 } from 'src/evaluation/evaluationContext';
+import { TEvaluationContext } from 'src/evaluation/types';
 import { TokenWalker } from 'src/parsing/TokenWalker';
 import { parseExpression } from 'src/parsing/parseExpression';
+import { parseProgram } from 'src/parsing/parseProgram';
+import { parseStatement } from 'src/parsing/parseStatement';
 
 export const mockRepoPath = () => {
   return path.join(process.cwd(), 'tests/mock-repo/');
@@ -61,7 +66,7 @@ export const waitUntilComplete = <Value, Error>(
   observer: MockObserver<Value, Error>
 ) => waitUntilCalled(observer.complete);
 
-export const createTestEvaluationContext = (
+export const testContext = (
   properties: PropertyDescriptorMap,
   options?: TContextOptions
 ) => {
@@ -74,9 +79,10 @@ export const createTestEvaluationContext = (
 };
 
 export const testIterate = {
-  expression: (contextDescriptor: PropertyDescriptorMap, expression: string) =>
-    evaluateExpression(
-      createTestEvaluationContext(contextDescriptor),
-      parseExpression(TokenWalker.from(expression))
-    )
+  expression: (context: TEvaluationContext, expression: string) =>
+    evaluateExpression(context, parseExpression(TokenWalker.from(expression))),
+  statement: (context: TEvaluationContext, statement: string) =>
+    evaluateStatement(context, parseStatement(TokenWalker.from(statement))),
+  program: (context: TEvaluationContext, program: string) =>
+    evaluateProgram(context, parseProgram(TokenWalker.from(program)))
 };

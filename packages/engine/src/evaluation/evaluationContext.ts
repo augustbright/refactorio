@@ -55,28 +55,32 @@ export const declare = (
     throw new TypeError(`Current context is forbidden to extend`);
   }
   if (Object.getOwnPropertyDescriptor(context, key)) {
-    throw new TypeError(`Identifier '${name}' is already declared`);
+    throw new TypeError(`Identifier '${key}' is already declared`);
   }
 
   Object.defineProperty(context, key, descriptor);
 };
 
-export const updateValue = (
+export const updateValue = <T>(
   context: TEvaluationContext,
   key: string,
-  value: unknown
-) => {
+  value: T
+): T => {
   if (Object.isFrozen(context)) {
     throw new TypeError(`Current context is forbidden to modify`);
   }
-  const descriptor = Object.getOwnPropertyDescriptor(context, key);
-  if (!descriptor) {
-    throw new ReferenceError(`${key} is not defined`);
+  const ownDescriptor = Object.getOwnPropertyDescriptor(context, key);
+  if (!ownDescriptor) {
+    if (Object.getPrototypeOf(context)) {
+      return updateValue(Object.getPrototypeOf(context), key, value);
+    } else {
+      throw new ReferenceError(`'${key}' is not defined`);
+    }
   }
-  if (!descriptor.writable) {
-    throw new TypeError(`Identifier '${name}' is already declared`);
+  if (!ownDescriptor.writable) {
+    throw new TypeError(`Identifier '${key}' is read-only`);
   }
-  context[key] = value;
+  return (context[key] = value);
 };
 
 export const getValue = (context: TEvaluationContext, key: string) => {
@@ -84,7 +88,19 @@ export const getValue = (context: TEvaluationContext, key: string) => {
     return context[key];
   }
 
-  throw new ReferenceError(`'${name}' is not defined`);
+  throw new ReferenceError(`'${key}' is not defined`);
+};
+
+export const hasOwnValue = (context: TEvaluationContext, key: string) => {
+  return Object.prototype.hasOwnProperty.call(context, key);
+};
+
+export const getOwnValue = (context: TEvaluationContext, key: string) => {
+  if (hasOwnValue(context, key)) {
+    return context[key];
+  }
+
+  throw new ReferenceError(`'${key}' is not defined in current context`);
 };
 
 export const isDebugging = (context: TEvaluationContext) => {

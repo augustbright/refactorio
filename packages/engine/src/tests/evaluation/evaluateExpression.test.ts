@@ -1,15 +1,18 @@
-import { testIterate } from '../testUtils';
+import { testContext, testIterate } from '../testUtils';
 
 describe('evaluateExpression', () => {
   test('literal', () => {
-    const iterator = testIterate.expression({}, '42');
+    const iterator = testIterate.expression(testContext({}), '42');
     expect(iterator.next()).toEqual({
       value: 42,
       done: true
     });
   });
   test('identifier', () => {
-    const iterator = testIterate.expression({ foo: { value: 42 } }, 'foo');
+    const iterator = testIterate.expression(
+      testContext({ foo: { value: 42 } }),
+      'foo'
+    );
     expect(iterator.next()).toEqual({
       value: 42,
       done: true
@@ -17,10 +20,10 @@ describe('evaluateExpression', () => {
   });
   test('binary expression', () => {
     const iterator = testIterate.expression(
-      {
+      testContext({
         foo: { value: 42 },
         bar: { value: 8 }
-      },
+      }),
       'foo + bar'
     );
 
@@ -31,13 +34,13 @@ describe('evaluateExpression', () => {
   });
   test('member expression', () => {
     const iterator = testIterate.expression(
-      {
+      testContext({
         foo: {
           value: {
             bar: 42
           }
         }
-      },
+      }),
       'foo.bar'
     );
     expect(iterator.next()).toEqual({
@@ -47,11 +50,11 @@ describe('evaluateExpression', () => {
   });
   test('call expression', () => {
     const iterator = testIterate.expression(
-      {
+      testContext({
         foo: {
           value: (a: number, b: number) => a + b
         }
-      },
+      }),
       'foo(1, 2)'
     );
     expect(iterator.next()).toEqual({
@@ -60,7 +63,7 @@ describe('evaluateExpression', () => {
     });
   });
   test('object literal', () => {
-    const iterator = testIterate.expression({}, '{ foo: 42 }');
+    const iterator = testIterate.expression(testContext({}), '{ foo: 42 }');
     expect(iterator.next()).toEqual({
       value: { foo: 42 },
       done: true
