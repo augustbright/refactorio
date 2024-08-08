@@ -4,7 +4,7 @@ describe('tokenizer', () => {
   test('generates tokens', () => {
     expect(new Tokenizer(`SET hit = TRUE`).tokenize()).toEqual([
       { type: 'SET', value: 'SET' },
-      { type: 'IDENTIFIER', value: 'hit' },
+      { type: 'WORD', value: 'hit' },
       { type: 'ASSIGN', value: '=' },
       { type: 'BOOLEAN', value: 'TRUE' }
     ]);
@@ -14,10 +14,10 @@ describe('tokenizer', () => {
         foo()`).tokenize()
     ).toEqual([
       { type: 'IF', value: 'IF' },
-      { type: 'IDENTIFIER', value: 'hit' },
+      { type: 'WORD', value: 'hit' },
       { type: 'NEWLINE', value: '' },
       { type: 'INDENTATION', value: '        ' },
-      { type: 'IDENTIFIER', value: 'foo' },
+      { type: 'WORD', value: 'foo' },
       { type: 'LPAREN', value: '(' },
       { type: 'RPAREN', value: ')' }
     ]);

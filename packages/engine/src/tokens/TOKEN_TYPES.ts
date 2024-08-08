@@ -36,7 +36,7 @@ export const TOKEN_TYPES = [
   { regex: /^'[^']*'/, type: 'STRING' },
   { regex: /^\d+/, type: 'NUMBER' },
 
-  { regex: /^[a-zA-Z_][a-zA-Z0-9_]*/, type: 'IDENTIFIER' },
+  { regex: /^[a-zA-Z_][a-zA-Z0-9_]*/, type: 'WORD' },
   { regex: /^'[^']*'/, type: 'STRING' },
   { regex: /^\n/, type: 'NEWLINE' },
   { regex: /^\s+/, type: 'INDENTATION' }

@@ -1,5 +1,12 @@
 import path from 'path';
 
+import {
+  TContextOptions,
+  createDebuggingContext,
+  createEvaluationContext,
+  setDebugging
+} from 'src/evaluation/evaluationContext';
+
 export const mockRepoPath = () => {
   return path.join(process.cwd(), 'tests/mock-repo/');
 };
@@ -50,3 +57,15 @@ export const waitUntilCalled = (fn: jest.Mock, timeout: number = 10_000) =>
 export const waitUntilComplete = <Value, Error>(
   observer: MockObserver<Value, Error>
 ) => waitUntilCalled(observer.complete);
+
+export const createTestEvaluationContext = (
+  properties: PropertyDescriptorMap,
+  options?: TContextOptions
+) => {
+  const debuggingContext = createDebuggingContext();
+  setDebugging(debuggingContext, true);
+  return createEvaluationContext(properties, {
+    ...options,
+    parent: debuggingContext
+  });
+};

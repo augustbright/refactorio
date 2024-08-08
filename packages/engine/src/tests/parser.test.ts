@@ -259,6 +259,9 @@ IN BlockStatement AS block
     expect(prettyText(parse(`IF (2 + 2) * 2 == 8 foo = 'hello'`), 0)).toBe(
       `IF (((2 + 2) * 2) == 8) foo = 'hello'`
     );
+    expect(prettyText(parse(`IF test one() ELSE two()`), 0)).toBe(
+      `IF test one() ELSE two()`
+    );
     expect(
       prettyText(
         parse(

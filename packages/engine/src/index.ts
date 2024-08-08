@@ -1,3 +1,3 @@
-export { parse } from './parsing/parser';
+export { parse } from './parsing';
 export * from './types';
 export * from './transformation';

@@ -3,8 +3,9 @@ import { TToken, TTokenType } from 'src/tokens';
 const ensureArray = <T>(value: T | T[]): T[] =>
   Array.isArray(value) ? value : [value];
 
-export class TTokenWalker {
+export class TokenWalker {
   private currentPosition = 0;
+  indentation = 0;
   constructor(private tokens: TToken[]) {}
 
   step(steps = 1): TToken | undefined {
@@ -17,6 +18,19 @@ export class TTokenWalker {
 
     const token = this.tokens[atPosition + skipSteps];
     return token && ensureArray(tokenType).includes(token.type);
+  }
+
+  isIntended(indentation: number, tokenType: TTokenType | TTokenType[]) {
+    if (!indentation) return this.is(tokenType);
+    if (
+      this.is('INDENTATION') &&
+      this.currentValue?.length === indentation &&
+      this.is(tokenType, 1)
+    ) {
+      this.step();
+      return true;
+    }
+    return false;
   }
 
   skip(
