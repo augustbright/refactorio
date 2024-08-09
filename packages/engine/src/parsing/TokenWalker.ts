@@ -6,7 +6,10 @@ const ensureArray = <T>(value: T | T[]): T[] =>
 export class TokenWalker {
   private currentPosition = 0;
   indentation = 0;
-  constructor(private tokens: TToken[]) {}
+  constructor(
+    private tokens: TToken[],
+    private code: string
+  ) {}
 
   step(steps = 1): TToken | undefined {
     return this.tokens[(this.currentPosition += steps)];
@@ -71,6 +74,9 @@ export class TokenWalker {
   get currentValue(): TToken['value'] | undefined {
     return this.current?.value;
   }
+  get currentLoc() {
+    return this.current?.loc;
+  }
   currentPlus(steps: number) {
     return this.tokens[this.currentPosition + steps];
   }
@@ -80,6 +86,6 @@ export class TokenWalker {
   }
 
   static from(code: string) {
-    return new TokenWalker(new Tokenizer(code).tokenize());
+    return new TokenWalker(new Tokenizer(code).tokenize(), code);
   }
 }

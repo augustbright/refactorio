@@ -1,7 +1,7 @@
 import { Options as RecastOptions } from 'recast';
 import { Tagged } from 'type-fest';
 
-import { TProgram } from 'src/types';
+import { TCommonNode, TProgram } from 'src/types';
 
 export type TParser = RecastOptions['parser'];
 export type TEvaluationContext = Tagged<
@@ -15,8 +15,15 @@ export type TScriptDefinition = TProgram | string;
 // TODO pass location
 export type TEvaluationPoint = {
   breakpoint?: boolean;
+  stepOut?: boolean;
+  step?: boolean;
+  node?: TCommonNode;
 };
-export type TEvaluationYieldResponse = 'step' | 'step into' | 'step out';
+export type TEvaluationYieldResponse =
+  | 'run'
+  | 'step'
+  | 'step into'
+  | 'step out';
 
 export type TEvaluator = Generator<
   TEvaluationPoint,

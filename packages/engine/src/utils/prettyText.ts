@@ -1,12 +1,13 @@
 import {
   TCommonNode,
-  TOperator,
   TSelectorPattern
 } from '@refactorio/engine/src/types/ast';
 
 import { UnreachableCaseError } from './UnreachableCaseError';
 
-const OPERATOR_VIEW: Record<TOperator, string> = {
+import { TBinaryExpressionOperatorTokenType } from 'src/tokens/types';
+
+const OPERATOR_VIEW: Record<TBinaryExpressionOperatorTokenType, string> = {
   PLUS: '+',
   MINUS: '-',
   MULTIPLY: '*',
@@ -14,7 +15,11 @@ const OPERATOR_VIEW: Record<TOperator, string> = {
   EQUALITY: '==',
   UNEQUALITY: '!=',
   AND: 'AND',
-  OR: 'OR'
+  OR: 'OR',
+  LESS_THAN: '<',
+  LESS_THAN_OR_EQUAL: '<=',
+  GREATER_THAN: '>',
+  GREATER_THAN_OR_EQUAL: '>='
 };
 
 const printSelector = (selector: TSelectorPattern[], level: number) =>
@@ -69,7 +74,7 @@ export const prettyText = (node: TCommonNode, level: number): string => {
       ]
         .filter(Boolean)
         .join(' ');
-    case 'TSelectorPattern':
+    case 'SelectorPattern':
       return [
         node.nodeType,
         node.filter
@@ -92,6 +97,8 @@ export const prettyText = (node: TCommonNode, level: number): string => {
         ) +
         `}`
       );
+    case 'Breakpoint':
+      return 'BREAKPOINT';
     default:
       throw new UnreachableCaseError(node);
   }

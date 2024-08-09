@@ -21,7 +21,8 @@ function parsePatternFilter(walker: TokenWalker): TExpression[] {
 }
 
 function parseSelectorPattern(walker: TokenWalker): TSelectorPattern {
-  const nodeType = walker.assertType('WORD', 'Expected Selector pattern').value;
+  const word = walker.assertType('WORD', 'Expected Selector pattern');
+  const nodeType = word.value;
   walker.step();
 
   let filter: TExpression[] | undefined;
@@ -30,9 +31,15 @@ function parseSelectorPattern(walker: TokenWalker): TSelectorPattern {
   }
 
   return {
-    type: 'TSelectorPattern',
+    type: 'SelectorPattern',
     nodeType,
-    filter
+    filter,
+    loc: {
+      start: word.loc.start,
+      column: word.loc.column,
+      line: word.loc.line,
+      end: (filter && filter[filter.length - 1].loc.end) || word.loc.end
+    }
   };
 }
 

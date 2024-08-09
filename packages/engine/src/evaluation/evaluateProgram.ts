@@ -1,3 +1,4 @@
+import { step } from './debugger';
 import { evaluateStatement } from './evaluateStatement';
 import { TEvaluationContext, TEvaluator } from './types';
 
@@ -8,7 +9,7 @@ export function* evaluateProgram(
   program: TProgram
 ): TEvaluator {
   for (const statement of program.body) {
-    yield* evaluateStatement(context, statement);
+    yield* step(context, statement, evaluateStatement(context, statement));
   }
 
   return;

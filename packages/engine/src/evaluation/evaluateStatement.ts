@@ -1,3 +1,4 @@
+import { step } from './debugger';
 import { evaluateExpression } from './evaluateExpression';
 import {
   createEvaluationContext,
@@ -20,31 +21,67 @@ export function* evaluateStatement(
     case 'Literal':
     case 'MemberExpression':
     case 'CallExpression':
-      return yield* evaluateExpression(context, statement);
+      return yield* step(
+        context,
+        statement,
+        evaluateExpression(context, statement)
+      );
     case 'VariableDeclaration':
       return declare(context, statement.name, {
-        value: yield* evaluateExpression(context, statement.value)
+        value: yield* step(
+          context,
+          statement,
+          evaluateExpression(context, statement.value)
+        ),
+        writable: true
       });
     case 'Assignment':
       return updateValue(
         context,
         statement.name,
-        yield* evaluateExpression(context, statement.value)
+        yield* step(
+          context,
+          statement.value,
+          evaluateExpression(context, statement.value)
+        )
       );
     case 'IfStatement':
-      if (yield* evaluateExpression(context, statement.condition)) {
-        return yield* evaluateStatement(context, statement.statement);
+      if (
+        yield* step(
+          context,
+          statement.condition,
+          evaluateExpression(context, statement.condition)
+        )
+      ) {
+        return yield* step(
+          context,
+          statement.statement,
+          evaluateStatement(context, statement.statement)
+        );
       } else if (statement.elseStatement) {
-        return yield* evaluateStatement(context, statement.elseStatement);
+        return yield* step(
+          context,
+          statement.elseStatement,
+          evaluateStatement(context, statement.elseStatement)
+        );
       }
       return;
     case 'Block': {
       const blockContext = createEvaluationContext({}, { parent: context });
       for (const blockStatement of statement.body) {
-        yield* evaluateStatement(blockContext, blockStatement);
+        yield* step(
+          context,
+          blockStatement,
+          evaluateStatement(blockContext, blockStatement)
+        );
       }
       return;
     }
+    case 'Breakpoint':
+      yield {
+        breakpoint: true
+      };
+      return;
     case 'InStatement':
       throw 'Not implemented';
     case 'ReplaceStatement':

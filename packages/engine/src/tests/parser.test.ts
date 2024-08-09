@@ -1,55 +1,42 @@
+import {
+  expectAssignment,
+  expectBinaryExpression,
+  expectCallExpression,
+  expectIdentifier,
+  expectIfStatement,
+  expectInStatement,
+  expectLiteral,
+  expectMemberExpression,
+  expectObjectLiteral,
+  expectProgram,
+  expectReplaceStatement,
+  expectSelectorPattern,
+  expectVariableDeclaration
+} from './testUtils/nodeMatchers';
+
 import { parse } from 'src/parsing';
 import { prettyText } from 'src/utils/prettyText';
 
 describe('parser', () => {
   test('parses tokens', () => {
-    expect(parse('')).toEqual({
-      type: 'Program',
-      body: []
-    });
+    expect(parse('')).toEqual(expectProgram([]));
 
-    expect(parse('SET foo = 123')).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'VariableDeclaration',
-          name: 'foo',
-          value: {
-            type: 'Literal',
-            value: 123
-          }
-        }
-      ]
-    });
+    expect(parse('SET foo = 123')).toEqual(
+      expectProgram([expectVariableDeclaration('foo', expectLiteral(123))])
+    );
 
-    expect(parse(`IF foo == 'hello' bar = TRUE`)).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'IfStatement',
-          condition: {
-            type: 'BinaryExpression',
-            operator: 'EQUALITY',
-            left: {
-              type: 'Identifier',
-              name: 'foo'
-            },
-            right: {
-              type: 'Literal',
-              value: 'hello'
-            }
-          },
-          statement: {
-            type: 'Assignment',
-            name: 'bar',
-            value: {
-              type: 'Literal',
-              value: true
-            }
-          }
-        }
-      ]
-    });
+    expect(parse(`IF foo == 'hello' bar = TRUE`)).toEqual(
+      expectProgram([
+        expectIfStatement(
+          expectBinaryExpression(
+            'EQUALITY',
+            expectIdentifier('foo'),
+            expectLiteral('hello')
+          ),
+          expectAssignment('bar', expectLiteral(true))
+        )
+      ])
+    );
   });
 
   test('parses block statements', () => {
@@ -69,117 +56,78 @@ ELSE
   });
 
   test('object member expression', () => {
-    expect(parse('SET foo = foo.prop1')).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'VariableDeclaration',
-          name: 'foo',
-          value: {
-            type: 'MemberExpression',
-            property: 'prop1',
-            object: { name: 'foo', type: 'Identifier' }
-          }
-        }
-      ]
-    });
+    expect(parse('SET foo = foo.prop1')).toEqual(
+      expectProgram([
+        expectVariableDeclaration(
+          'foo',
+          expectMemberExpression(expectIdentifier('foo'), 'prop1')
+        )
+      ])
+    );
 
-    expect(parse(`SET foo = ('foo' + 'bar').prop1.prop2`)).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'VariableDeclaration',
-          name: 'foo',
-          value: {
-            type: 'MemberExpression',
-            object: {
-              type: 'MemberExpression',
-              object: {
-                type: 'BinaryExpression',
-                operator: 'PLUS',
-                left: {
-                  type: 'Literal',
-                  value: 'foo'
-                },
-                right: {
-                  type: 'Literal',
-                  value: 'bar'
-                }
-              },
-              property: 'prop1'
-            },
-            property: 'prop2'
-          }
-        }
-      ]
-    });
+    expect(parse(`SET foo = ('foo' + 'bar').prop1.prop2`)).toEqual(
+      expectProgram([
+        expectVariableDeclaration(
+          'foo',
+          expectMemberExpression(
+            expectMemberExpression(
+              expectBinaryExpression(
+                'PLUS',
+                expectLiteral('foo'),
+                expectLiteral('bar')
+              ),
+              'prop1'
+            ),
+            'prop2'
+          )
+        )
+      ])
+    );
   });
 
   test('IN statement', () => {
     expect(
       parse(`IN BlockStatement AS block print('Hello from some Block!')`)
-    ).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'InStatement',
-          alias: 'block',
-          selector: [{ type: 'TSelectorPattern', nodeType: 'BlockStatement' }],
-          statement: {
-            type: 'CallExpression',
-            callee: { type: 'Identifier', name: 'print' },
-            arguments: [{ type: 'Literal', value: 'Hello from some Block!' }]
-          }
-        }
-      ]
-    });
+    ).toEqual(
+      expectProgram([
+        expectInStatement(
+          [expectSelectorPattern('BlockStatement')],
+          'block',
+          expectCallExpression(expectIdentifier('print'), [
+            expectLiteral('Hello from some Block!')
+          ])
+        )
+      ])
+    );
 
     expect(
       parse(
         `IN BlockStatement Identifier[name=='foo'] AS i REPLACE WITH i.with({name: 'bar'})`
       )
-    ).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'InStatement',
-          alias: 'i',
-          selector: [
-            { type: 'TSelectorPattern', nodeType: 'BlockStatement' },
-            {
-              type: 'TSelectorPattern',
-              nodeType: 'Identifier',
-              filter: [
-                {
-                  type: 'BinaryExpression',
-                  operator: 'EQUALITY',
-                  left: { type: 'Identifier', name: 'name' },
-                  right: { type: 'Literal', value: 'foo' }
-                }
-              ]
-            }
+    ).toEqual(
+      expectProgram([
+        expectInStatement(
+          [
+            expectSelectorPattern('BlockStatement'),
+            expectSelectorPattern('Identifier', [
+              expectBinaryExpression(
+                'EQUALITY',
+                expectIdentifier('name'),
+                expectLiteral('foo')
+              )
+            ])
           ],
-          statement: {
-            type: 'ReplaceStatement',
-            selector: [],
-            newValue: {
-              type: 'CallExpression',
-              callee: {
-                type: 'MemberExpression',
-                object: { type: 'Identifier', name: 'i' },
-                property: 'with'
-              },
-              arguments: [
-                {
-                  type: 'ObjectLiteral',
-                  map: { name: { type: 'Literal', value: 'bar' } }
-                }
-              ]
-            }
-          }
-        }
-      ]
-    });
+          'i',
+          expectReplaceStatement(
+            [],
+            expectCallExpression(
+              expectMemberExpression(expectIdentifier('i'), 'with'),
+              [expectObjectLiteral({ name: expectLiteral('bar') })]
+            )
+          )
+        )
+      ])
+    );
 
     expect(
       prettyText(
@@ -204,45 +152,19 @@ IN BlockStatement AS block
   });
 
   test('call expressions', () => {
-    expect(parse(`foo()`)).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'CallExpression',
-          callee: {
-            type: 'Identifier',
-            name: 'foo'
-          },
-          arguments: []
-        }
-      ]
-    });
-    expect(parse(`foo(a, b, c)`)).toEqual({
-      type: 'Program',
-      body: [
-        {
-          type: 'CallExpression',
-          callee: {
-            type: 'Identifier',
-            name: 'foo'
-          },
-          arguments: [
-            {
-              type: 'Identifier',
-              name: 'a'
-            },
-            {
-              type: 'Identifier',
-              name: 'b'
-            },
-            {
-              type: 'Identifier',
-              name: 'c'
-            }
-          ]
-        }
-      ]
-    });
+    expect(parse(`foo()`)).toEqual(
+      expectProgram([expectCallExpression(expectIdentifier('foo'), [])])
+    );
+
+    expect(parse(`foo(a, b, c)`)).toEqual(
+      expectProgram([
+        expectCallExpression(expectIdentifier('foo'), [
+          expectIdentifier('a'),
+          expectIdentifier('b'),
+          expectIdentifier('c')
+        ])
+      ])
+    );
   });
 
   test('complex expressions', () => {

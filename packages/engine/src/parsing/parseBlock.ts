@@ -37,6 +37,12 @@ export function parseBlock(
 
   return {
     type: 'Block',
-    body
+    body,
+    loc: {
+      start: body[0]?.loc.start,
+      end: body[body.length - 1]?.loc.end,
+      column: blockIndentation,
+      line: body[0]?.loc.line
+    }
   };
 }

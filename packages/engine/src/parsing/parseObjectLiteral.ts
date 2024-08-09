@@ -4,7 +4,10 @@ import { parseExpression } from './parseExpression';
 import { TObjectLiteral } from 'src/types';
 
 export function parseObjectLiteral(walker: TokenWalker): TObjectLiteral {
-  walker.assertType('LCB', 'Expected object literal, but got unexpected token');
+  const lcb = walker.assertType(
+    'LCB',
+    'Expected object literal, but got unexpected token'
+  );
   walker.step();
   const map: TObjectLiteral['map'] = {};
 
@@ -27,10 +30,17 @@ export function parseObjectLiteral(walker: TokenWalker): TObjectLiteral {
     walker.skipSingle('COMMA');
     map[key] = expression;
   }
+  const rcb = walker.assertType('RCB', 'Expected closing "}"');
   walker.step();
 
   return {
     type: 'ObjectLiteral',
-    map
+    map,
+    loc: {
+      start: lcb.loc.start,
+      end: rcb.loc.end,
+      line: lcb.loc.line,
+      column: lcb.loc.column
+    }
   };
 }

@@ -6,7 +6,16 @@ import { parseStatement } from './parseStatement';
 import { TStatement } from 'src/types';
 
 export function parseCommonStatement(walker: TokenWalker): TStatement {
-  if (walker.is('SET')) {
+  const commonStatement = walker.current;
+
+  if (commonStatement?.type === 'BREAKPOINT' && walker.currentLoc) {
+    walker.step();
+    return {
+      type: 'Breakpoint',
+      loc: commonStatement.loc
+    };
+  }
+  if (commonStatement?.type === 'SET') {
     walker.step();
 
     const name = walker.current;
@@ -18,13 +27,21 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
     walker.assertType('ASSIGN', 'Expected = after variable name');
     walker.step();
 
+    const value = parseExpression(walker);
+
     return {
       type: 'VariableDeclaration',
       name: name.value,
-      value: parseExpression(walker)
+      value,
+      loc: {
+        start: commonStatement.loc.start,
+        end: value.loc.end,
+        column: commonStatement.loc.column,
+        line: commonStatement.loc.line
+      }
     };
   }
-  if (walker.is('IN')) {
+  if (commonStatement?.type === 'IN') {
     walker.step();
     const selector = parseSelectorPatterns(walker);
 
@@ -41,10 +58,16 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
       type: 'InStatement',
       alias,
       selector,
-      statement
+      statement,
+      loc: {
+        start: commonStatement.loc.start,
+        column: commonStatement.loc.column,
+        line: commonStatement.loc.line,
+        end: statement.loc.end
+      }
     };
   }
-  if (walker.is('REPLACE')) {
+  if (commonStatement?.type === 'REPLACE') {
     walker.step();
     const selector = parseSelectorPatterns(walker);
     walker.skip(['NEWLINE', 'INDENTATION']);
@@ -69,10 +92,16 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
       selector,
       newValue,
       andStatement,
-      orStatement
+      orStatement,
+      loc: {
+        start: commonStatement.loc.start,
+        column: commonStatement.loc.column,
+        line: commonStatement.loc.line,
+        end: orStatement?.loc.end || andStatement?.loc.end || newValue.loc.end
+      }
     };
   }
-  if (walker.is('IF')) {
+  if (commonStatement?.type === 'IF') {
     const requiredIndentation = walker.indentation;
     walker.step();
     const condition = parseExpression(walker);
@@ -87,19 +116,32 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
       type: 'IfStatement',
       condition: condition,
       statement: statement,
-      elseStatement
+      elseStatement,
+      loc: {
+        start: commonStatement.loc.start,
+        column: commonStatement.loc.column,
+        line: commonStatement.loc.line,
+        end: elseStatement?.loc.end || statement.loc.end
+      }
     };
   }
-  if (walker.is('WORD') && walker.is('ASSIGN', 1)) {
+  if (commonStatement?.type === 'WORD' && walker.is('ASSIGN', 1)) {
     const name = walker.currentValue;
     if (!name) {
       throw new SyntaxError('Expected variable name');
     }
     walker.step(2);
+    const value = parseExpression(walker);
     return {
       type: 'Assignment',
       name,
-      value: parseExpression(walker)
+      value,
+      loc: {
+        start: commonStatement.loc.start,
+        column: commonStatement.loc.column,
+        line: commonStatement.loc.line,
+        end: value.loc.end
+      }
     };
   }
 

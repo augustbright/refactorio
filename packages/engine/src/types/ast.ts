@@ -1,15 +1,10 @@
-export type TOperator =
-  | 'EQUALITY'
-  | 'UNEQUALITY'
-  | 'PLUS'
-  | 'MINUS'
-  | 'MULTIPLY'
-  | 'DIVIDE'
-  | 'AND'
-  | 'OR';
+import { TLocation } from './location';
+
+import { TBinaryExpressionOperatorTokenType } from 'src/tokens/types';
 
 export interface TNode {
   type: string;
+  loc: TLocation;
 }
 
 export interface TVariableDeclaration extends TNode {
@@ -62,7 +57,7 @@ export interface TObjectLiteral extends TNode {
 
 export interface TBinaryExpression extends TNode {
   type: 'BinaryExpression';
-  operator: TOperator;
+  operator: TBinaryExpressionOperatorTokenType;
   left: TExpression;
   right: TExpression;
 }
@@ -74,7 +69,7 @@ export interface TCallExpression extends TNode {
 }
 
 export interface TSelectorPattern extends TNode {
-  type: 'TSelectorPattern';
+  type: 'SelectorPattern';
   nodeType: string;
   filter?: TExpression[];
 }
@@ -90,6 +85,10 @@ export interface TBlock extends TNode {
   body: TStatement[];
 }
 
+export interface TBreakpoint extends TNode {
+  type: 'Breakpoint';
+}
+
 export type TStatement =
   | TVariableDeclaration
   | TReplaceStatement
@@ -97,7 +96,8 @@ export type TStatement =
   | TAssignment
   | TBlock
   | TExpression
-  | TInStatement;
+  | TInStatement
+  | TBreakpoint;
 
 export type TExpression =
   | TIdentifier
@@ -117,3 +117,8 @@ export type TCommonNode =
   | TStatement
   | TExpression
   | TSelectorPattern;
+
+export type TNodeWithType<T extends TCommonNode['type']> = Extract<
+  TCommonNode,
+  { type: T }
+>;

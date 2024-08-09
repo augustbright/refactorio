@@ -19,21 +19,24 @@ export function* evaluateExpression(
     case 'BinaryExpression': {
       return yield* step(
         context,
+        expression,
         evaluateBinaryExpression(context, expression)
       );
     }
     case 'MemberExpression':
       return yield* step(
         context,
+        expression,
         member(context, expression.object, expression.property)
       );
     case 'CallExpression':
       return yield* step(
         context,
+        expression,
         call(context, expression.callee, expression.arguments)
       );
     case 'ObjectLiteral':
-      return yield* step(context, object(context, expression));
+      return yield* step(context, expression, object(context, expression));
     default:
       throw new UnreachableCaseError(expression);
   }
@@ -73,6 +76,30 @@ function* evaluateBinaryExpression(
     return left === right;
   } else if (expression.operator === 'UNEQUALITY') {
     return left !== right;
+  } else if (expression.operator === 'GREATER_THAN') {
+    if (typeof left === 'number' && typeof right === 'number') {
+      return left > right;
+    }
+    throw new Error(`Cannot apply operator '>' on values ${left} and ${right}`);
+  } else if (expression.operator === 'GREATER_THAN_OR_EQUAL') {
+    if (typeof left === 'number' && typeof right === 'number') {
+      return left >= right;
+    }
+    throw new Error(
+      `Cannot apply operator '>=' on values ${left} and ${right}`
+    );
+  } else if (expression.operator === 'LESS_THAN') {
+    if (typeof left === 'number' && typeof right === 'number') {
+      return left < right;
+    }
+    throw new Error(`Cannot apply operator '<' on values ${left} and ${right}`);
+  } else if (expression.operator === 'LESS_THAN_OR_EQUAL') {
+    if (typeof left === 'number' && typeof right === 'number') {
+      return left <= right;
+    }
+    throw new Error(
+      `Cannot apply operator '<=' on values ${left} and ${right}`
+    );
   } else if (expression.operator === 'AND') {
     return left && right;
   } else if (expression.operator === 'OR') {
