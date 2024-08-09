@@ -3,7 +3,9 @@ import { parseExpression } from './parseExpression';
 import { parseSelectorPatterns } from './parseSelectorPatters';
 import { parseStatement } from './parseStatement';
 
+import { ErrorManager } from 'src/errors';
 import { TStatement } from 'src/types';
+import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
 
 export function parseCommonStatement(walker: TokenWalker): TStatement {
   const commonStatement = walker.current;
@@ -20,7 +22,10 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
 
     const name = walker.current;
     if (!name) {
-      throw new SyntaxError('Expected variable name');
+      return ErrorManager.throw(
+        new SyntaxError('Expected variable name'),
+        walker.currentLoc || EMPTY_LOCATION
+      );
     }
     walker.step();
 
@@ -50,7 +55,10 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
 
     const alias = walker.currentValue;
     if (!alias) {
-      throw new SyntaxError('Expected alias name');
+      return ErrorManager.throw(
+        new SyntaxError('Expected alias name'),
+        walker.currentLoc || EMPTY_LOCATION
+      );
     }
     walker.step();
     const statement = parseStatement(walker);
@@ -128,7 +136,11 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
   if (commonStatement?.type === 'WORD' && walker.is('ASSIGN', 1)) {
     const name = walker.currentValue;
     if (!name) {
-      throw new SyntaxError('Expected variable name');
+      // throw new SyntaxError('Expected variable name');
+      return ErrorManager.throw(
+        new SyntaxError('Expected variable name'),
+        walker.currentLoc || EMPTY_LOCATION
+      );
     }
     walker.step(2);
     const value = parseExpression(walker);

@@ -1,3 +1,5 @@
+import { get } from 'lodash';
+
 import { step } from './debugger';
 import { evaluateExpression } from './evaluateExpression';
 import {
@@ -7,6 +9,7 @@ import {
 } from './evaluationContext';
 import { TEvaluationContext, TEvaluator } from './types';
 
+import { ErrorManager } from 'src/errors';
 import { TStatement } from 'src/types';
 import { UnreachableCaseError } from 'src/utils/UnreachableCaseError';
 
@@ -27,14 +30,19 @@ export function* evaluateStatement(
         evaluateExpression(context, statement)
       );
     case 'VariableDeclaration':
-      return declare(context, statement.name, {
-        value: yield* step(
-          context,
-          statement,
-          evaluateExpression(context, statement.value)
-        ),
-        writable: true
-      });
+      return declare(
+        context,
+        statement.name,
+        {
+          value: yield* step(
+            context,
+            statement,
+            evaluateExpression(context, statement.value)
+          ),
+          writable: true
+        },
+        statement.loc
+      );
     case 'Assignment':
       return updateValue(
         context,
@@ -43,7 +51,8 @@ export function* evaluateStatement(
           context,
           statement.value,
           evaluateExpression(context, statement.value)
-        )
+        ),
+        statement.loc
       );
     case 'IfStatement':
       if (
@@ -83,10 +92,15 @@ export function* evaluateStatement(
       };
       return;
     case 'InStatement':
+      // eslint-disable-next-line no-restricted-syntax
       throw 'Not implemented';
     case 'ReplaceStatement':
+      // eslint-disable-next-line no-restricted-syntax
       throw 'not implemented';
     default:
-      throw new UnreachableCaseError(statement);
+      ErrorManager.throw(
+        new UnreachableCaseError(statement),
+        get(statement, 'loc')
+      );
   }
 }

@@ -1,6 +1,7 @@
 import { isDebugging, isSuspended, setSuspended } from './evaluationContext';
 import { TEvaluationContext, TEvaluator } from './types';
 
+import { ErrorManager } from 'src/errors';
 import { TCommonNode } from 'src/types';
 import { UnreachableCaseError } from 'src/utils/UnreachableCaseError';
 
@@ -23,7 +24,7 @@ export function* step(
     } else if (!response || response === 'run') {
       setSuspended(context, false);
     } else {
-      throw new UnreachableCaseError(response);
+      return ErrorManager.throw(new UnreachableCaseError(response), node.loc);
     }
   }
   return yield* stepOver(context, node, evaluator);

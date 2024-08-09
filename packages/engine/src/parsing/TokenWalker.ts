@@ -1,4 +1,6 @@
+import { ErrorManager } from 'src/errors';
 import { TToken, TTokenType, Tokenizer } from 'src/tokens';
+import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
 
 const ensureArray = <T>(value: T | T[]): T[] =>
   Array.isArray(value) ? value : [value];
@@ -6,7 +8,7 @@ const ensureArray = <T>(value: T | T[]): T[] =>
 export class TokenWalker {
   private currentPosition = 0;
   indentation = 0;
-  constructor(
+  private constructor(
     private tokens: TToken[],
     private code: string
   ) {}
@@ -59,7 +61,11 @@ export class TokenWalker {
     const matches = ensureArray(tokenType).some((token) => this.is(token));
 
     if (!matches) {
-      throw new SyntaxError(`${errorMessage}, got: "${this.current?.value}"`);
+      // throw new SyntaxError(`${errorMessage}, got: "${this.current?.value}"`);
+      return ErrorManager.throw(
+        new SyntaxError(`${errorMessage}, got: "${this.current?.value}"`),
+        this.currentLoc || EMPTY_LOCATION
+      );
     }
 
     return this.current as TToken;

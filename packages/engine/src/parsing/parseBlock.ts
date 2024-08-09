@@ -1,7 +1,9 @@
 import { TokenWalker } from './TokenWalker';
 import { parseCommonStatement } from './parseCommonStatement';
 
+import { ErrorManager } from 'src/errors';
 import { TBlock } from 'src/types';
+import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
 
 export function parseBlock(
   walker: TokenWalker,
@@ -12,7 +14,11 @@ export function parseBlock(
   while (!walker.done) {
     const token = walker.current;
     if (!token) {
-      throw new SyntaxError('Unexpected end of input');
+      // throw new SyntaxError('Unexpected end of input');
+      return ErrorManager.throw(
+        new SyntaxError('Unexpected end of input'),
+        walker.currentPlus(-1).loc || EMPTY_LOCATION
+      );
     }
     if (!walker.is('INDENTATION')) {
       walker.indentation = 0;

@@ -1,5 +1,8 @@
 import { TEvaluationContext } from './types';
 
+import { ErrorManager } from 'src/errors';
+import { TLocation } from 'src/types';
+
 export type TContextOptions = {
   freeze?: boolean;
   parent?: TEvaluationContext;
@@ -45,17 +48,24 @@ export const createDebuggingContext = () => {
 export const declare = (
   context: TEvaluationContext,
   key: string,
-  descriptor: PropertyDescriptor
+  descriptor: PropertyDescriptor,
+  loc: TLocation
 ) => {
   if (
     Object.isFrozen(context) ||
     Object.isSealed(context) ||
     !Object.isExtensible(context)
   ) {
-    throw new TypeError(`Current context is forbidden to extend`);
+    return ErrorManager.throw(
+      new TypeError(`Current context is forbidden to extend`),
+      loc
+    );
   }
   if (Object.getOwnPropertyDescriptor(context, key)) {
-    throw new TypeError(`Identifier '${key}' is already declared`);
+    return ErrorManager.throw(
+      new TypeError(`Identifier '${key}' is already declared`),
+      loc
+    );
   }
 
   Object.defineProperty(context, key, descriptor);
@@ -64,43 +74,64 @@ export const declare = (
 export const updateValue = <T>(
   context: TEvaluationContext,
   key: string,
-  value: T
+  value: T,
+  loc: TLocation
 ): T => {
   if (Object.isFrozen(context)) {
-    throw new TypeError(`Current context is forbidden to modify`);
+    return ErrorManager.throw(
+      new TypeError(`Current context is forbidden to modify`),
+      loc
+    );
   }
   const ownDescriptor = Object.getOwnPropertyDescriptor(context, key);
   if (!ownDescriptor) {
     if (Object.getPrototypeOf(context)) {
-      return updateValue(Object.getPrototypeOf(context), key, value);
+      return updateValue(Object.getPrototypeOf(context), key, value, loc);
     } else {
-      throw new ReferenceError(`'${key}' is not defined`);
+      return ErrorManager.throw(
+        new ReferenceError(`'${key}' is not defined`),
+        loc
+      );
     }
   }
   if (!ownDescriptor.writable) {
-    throw new TypeError(`Identifier '${key}' is read-only`);
+    return ErrorManager.throw(
+      new TypeError(`Identifier '${key}' is read-only`),
+      loc
+    );
   }
   return (context[key] = value);
 };
 
-export const getValue = (context: TEvaluationContext, key: string) => {
+export const getValue = (
+  context: TEvaluationContext,
+  key: string,
+  loc: TLocation
+) => {
   if (key in context) {
     return context[key];
   }
 
-  throw new ReferenceError(`'${key}' is not defined`);
+  return ErrorManager.throw(new ReferenceError(`'${key}' is not defined`), loc);
 };
 
 export const hasOwnValue = (context: TEvaluationContext, key: string) => {
   return Object.prototype.hasOwnProperty.call(context, key);
 };
 
-export const getOwnValue = (context: TEvaluationContext, key: string) => {
+export const getOwnValue = (
+  context: TEvaluationContext,
+  key: string,
+  loc: TLocation
+) => {
   if (hasOwnValue(context, key)) {
     return context[key];
   }
 
-  throw new ReferenceError(`'${key}' is not defined in current context`);
+  return ErrorManager.throw(
+    new ReferenceError(`'${key}' is not defined in current context`),
+    loc
+  );
 };
 
 export const isDebugging = (context: TEvaluationContext) => {

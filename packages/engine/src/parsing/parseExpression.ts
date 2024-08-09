@@ -1,10 +1,12 @@
 import { TokenWalker } from './TokenWalker';
 import { parseObjectLiteral } from './parseObjectLiteral';
 
+import { ErrorManager } from 'src/errors';
 import { BINARY_EXPRESSION_OPERATORS_TOKEN_TYPES } from 'src/tokens/TOKEN_TYPES';
 import { TBinaryExpressionOperatorTokenType, TToken } from 'src/tokens/types';
 import { TExpression } from 'src/types';
 import { UnreachableCaseError } from 'src/utils/UnreachableCaseError';
+import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
 
 export function parseExpression(walker: TokenWalker): TExpression {
   const left = parseMemberExpression(walker);
@@ -75,7 +77,10 @@ function getPrecedence(operator: TToken) {
     case 'DIVIDE':
       return 4;
     default:
-      throw new UnreachableCaseError(operator.type);
+      return ErrorManager.throw(
+        new UnreachableCaseError(operator.type),
+        operator.loc
+      );
   }
 }
 
@@ -87,7 +92,10 @@ function parseMemberExpression(walker: TokenWalker) {
     if (walker.is('DOT')) {
       const property = walker.currentValue;
       if (!property) {
-        throw new SyntaxError('Expected property name');
+        return ErrorManager.throw(
+          new SyntaxError('Expected property name'),
+          walker.currentLoc || EMPTY_LOCATION
+        );
       }
       walker.step();
       expression = {
@@ -128,7 +136,10 @@ function parseMemberExpression(walker: TokenWalker) {
 function parsePrimaryExpression(walker: TokenWalker): TExpression {
   const token = walker.current;
   if (!token) {
-    throw new SyntaxError('Unexpected end of input');
+    return ErrorManager.throw(
+      new SyntaxError('Unexpected end of input'),
+      walker.currentLoc || EMPTY_LOCATION
+    );
   }
 
   switch (token.type) {
@@ -172,7 +183,10 @@ function parsePrimaryExpression(walker: TokenWalker): TExpression {
     return expression;
   }
 
-  throw new SyntaxError('Invalid primary expression');
+  return ErrorManager.throw(
+    new SyntaxError('Invalid primary expression'),
+    token.loc
+  );
 }
 
 function parseArguments(walker: TokenWalker): TExpression[] {

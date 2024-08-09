@@ -5,6 +5,7 @@ import {
   isSuspended,
   setDebugging
 } from 'src/evaluation/evaluationContext';
+import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
 
 // evaluation programs always return undefined
 
@@ -66,7 +67,7 @@ describe('evaluateProgram', () => {
         },
         done: false
       });
-      expect(getValue(context, 'value')).toBe(42);
+      expect(getValue(context, 'value', EMPTY_LOCATION)).toBe(42);
       expect(isSuspended(context)).toBeTrue();
 
       expect(iterator.next('step')).toMatchObject({
@@ -75,14 +76,14 @@ describe('evaluateProgram', () => {
         },
         done: false
       });
-      expect(getValue(context, 'value')).toBe(42);
+      expect(getValue(context, 'value', EMPTY_LOCATION)).toBe(42);
       expect(iterator.next('step')).toMatchObject({
         value: {
           step: true
         },
         done: false
       });
-      expect(getValue(context, 'value')).toBe(43);
+      expect(getValue(context, 'value', EMPTY_LOCATION)).toBe(43);
       expect(iterator.next('step')).toMatchObject({
         value: undefined,
         done: true

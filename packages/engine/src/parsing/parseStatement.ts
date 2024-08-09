@@ -2,6 +2,7 @@ import { TokenWalker } from './TokenWalker';
 import { parseBlock } from './parseBlock';
 import { parseCommonStatement } from './parseCommonStatement';
 
+import { ErrorManager } from 'src/errors';
 import { TStatement } from 'src/types';
 
 export function parseStatement(walker: TokenWalker): TStatement {
@@ -12,7 +13,10 @@ export function parseStatement(walker: TokenWalker): TStatement {
       'Expected indentation'
     );
     if (indentationToken.value.length <= walker.indentation) {
-      throw new SyntaxError('Broken indentation');
+      return ErrorManager.throw(
+        new SyntaxError('Broken indentation'),
+        indentationToken.loc
+      );
     }
     walker.indentation = indentationToken.value.length;
     return parseBlock(walker, walker.indentation);

@@ -1,9 +1,11 @@
+import { get } from 'lodash';
 import { UnknownRecord } from 'type-fest';
 
 import { step } from './debugger';
 import { getValue } from './evaluationContext';
 import { TEvaluationContext, TEvaluator } from './types';
 
+import { ErrorManager } from 'src/errors';
 import { TBinaryExpression, TExpression, TObjectLiteral } from 'src/types';
 import { UnreachableCaseError } from 'src/utils/UnreachableCaseError';
 
@@ -15,7 +17,7 @@ export function* evaluateExpression(
     case 'Literal':
       return expression.value;
     case 'Identifier':
-      return getValue(context, expression.name);
+      return getValue(context, expression.name, expression.loc);
     case 'BinaryExpression': {
       return yield* step(
         context,
@@ -38,7 +40,10 @@ export function* evaluateExpression(
     case 'ObjectLiteral':
       return yield* step(context, expression, object(context, expression));
     default:
-      throw new UnreachableCaseError(expression);
+      ErrorManager.throw(
+        new UnreachableCaseError(expression),
+        get(expression, 'loc')
+      );
   }
 }
 
@@ -49,6 +54,21 @@ function* evaluateBinaryExpression(
   const left = yield* evaluateExpression(context, expression.left);
   const right = yield* evaluateExpression(context, expression.right);
 
+  const assertNumbers = (operator: string, left: unknown, right: unknown) => {
+    if (typeof left === 'number' && typeof right === 'number') {
+      return true;
+    }
+    return throwCannotApply(operator, left, right);
+  };
+
+  const throwCannotApply = (operator: string, left: unknown, right: unknown) =>
+    ErrorManager.throw(
+      new Error(
+        `Cannot apply operator ${operator} on values ${left} and ${right}`
+      ),
+      expression.loc
+    );
+
   if (expression.operator === 'PLUS') {
     if (typeof left === 'number' && typeof right === 'number') {
       return left + right;
@@ -56,56 +76,55 @@ function* evaluateBinaryExpression(
     if (typeof left === 'string' && typeof right === 'string') {
       return left + right;
     }
-    throw new Error(`Cannot apply operator '+' on values ${left} and ${right}`);
+    return throwCannotApply('+', left, right);
   } else if (expression.operator === 'MINUS') {
+    assertNumbers('-', left, right);
     if (typeof left === 'number' && typeof right === 'number') {
       return left - right;
     }
-    throw new Error(`Cannot apply operator '-' on values ${left} and ${right}`);
   } else if (expression.operator === 'MULTIPLY') {
+    assertNumbers('*', left, right);
     if (typeof left === 'number' && typeof right === 'number') {
       return left * right;
     }
-    throw new Error(`Cannot apply operator '*' on values ${left} and ${right}`);
   } else if (expression.operator === 'DIVIDE') {
+    assertNumbers('/', left, right);
     if (typeof left === 'number' && typeof right === 'number') {
       return left / right;
     }
-    throw new Error(`Cannot apply operator '/' on values ${left} and ${right}`);
   } else if (expression.operator === 'EQUALITY') {
     return left === right;
   } else if (expression.operator === 'UNEQUALITY') {
     return left !== right;
   } else if (expression.operator === 'GREATER_THAN') {
+    assertNumbers('>', left, right);
     if (typeof left === 'number' && typeof right === 'number') {
       return left > right;
     }
-    throw new Error(`Cannot apply operator '>' on values ${left} and ${right}`);
   } else if (expression.operator === 'GREATER_THAN_OR_EQUAL') {
+    assertNumbers('>=', left, right);
     if (typeof left === 'number' && typeof right === 'number') {
       return left >= right;
     }
-    throw new Error(
-      `Cannot apply operator '>=' on values ${left} and ${right}`
-    );
   } else if (expression.operator === 'LESS_THAN') {
+    assertNumbers('<', left, right);
     if (typeof left === 'number' && typeof right === 'number') {
       return left < right;
     }
-    throw new Error(`Cannot apply operator '<' on values ${left} and ${right}`);
   } else if (expression.operator === 'LESS_THAN_OR_EQUAL') {
+    assertNumbers('<=', left, right);
     if (typeof left === 'number' && typeof right === 'number') {
       return left <= right;
     }
-    throw new Error(
-      `Cannot apply operator '<=' on values ${left} and ${right}`
-    );
   } else if (expression.operator === 'AND') {
     return left && right;
   } else if (expression.operator === 'OR') {
     return left || right;
   } else {
-    throw new UnreachableCaseError(expression.operator);
+    ErrorManager.throw(
+      new UnreachableCaseError(expression.operator),
+      get(expression, 'loc')
+    );
   }
 }
 
@@ -118,7 +137,10 @@ function* member(
   if (typeof object === 'object' && object !== null) {
     return (object as Record<string, unknown>)[property];
   }
-  throw new Error(`Cannot get property of ${object}`);
+  ErrorManager.throw(
+    new Error(`Cannot get property of ${object}`),
+    expression.loc
+  );
 }
 
 function* call(
@@ -134,7 +156,7 @@ function* call(
     }
     return func.call(null, ...evaluatedArgs);
   }
-  throw new Error(`Expression is not callable`);
+  ErrorManager.throw(new Error(`Expression is not callable`), expression.loc);
 }
 
 function* object(

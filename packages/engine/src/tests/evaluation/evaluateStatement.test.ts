@@ -1,6 +1,7 @@
 import { testContext, testIterate } from '../testUtils';
 
 import { getOwnValue, hasOwnValue } from 'src/evaluation/evaluationContext';
+import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
 
 describe('evaluateStatement', () => {
   describe('expressions as statements', () => {
@@ -75,7 +76,7 @@ describe('evaluateStatement', () => {
         value: undefined,
         done: true
       });
-      expect(getOwnValue(context, 'foo')).toBe(42);
+      expect(getOwnValue(context, 'foo', EMPTY_LOCATION)).toBe(42);
     });
 
     test('Variable assignment', () => {
@@ -85,7 +86,7 @@ describe('evaluateStatement', () => {
         value: 8,
         done: true
       });
-      expect(getOwnValue(context, 'foo')).toBe(8);
+      expect(getOwnValue(context, 'foo', EMPTY_LOCATION)).toBe(8);
     });
 
     test('Chained variable assignment', () => {
@@ -98,8 +99,8 @@ describe('evaluateStatement', () => {
         value: 8,
         done: true
       });
-      expect(getOwnValue(context, 'foo')).toBe(8);
-      expect(getOwnValue(context, 'bar')).toBe(8);
+      expect(getOwnValue(context, 'foo', EMPTY_LOCATION)).toBe(8);
+      expect(getOwnValue(context, 'bar', EMPTY_LOCATION)).toBe(8);
     });
 
     test('Variable assignment to undeclared identifier', () => {
@@ -243,7 +244,7 @@ describe('evaluateStatement', () => {
       });
       expect(hasOwnValue(context, 'foo')).toBeFalse();
       expect(hasOwnValue(context, 'bar')).toBeFalse();
-      expect(getOwnValue(context, 'result')).toBe(50);
+      expect(getOwnValue(context, 'result', EMPTY_LOCATION)).toBe(50);
     });
 
     // Block statement can be nested, creating a new context for each block

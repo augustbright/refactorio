@@ -1,6 +1,8 @@
 import { TOKEN_TYPES } from './TOKEN_TYPES';
 import { TToken } from './types';
 
+import { ErrorManager } from 'src/errors';
+
 export class Tokenizer {
   constructor(private input: string) {}
 
@@ -72,7 +74,10 @@ export class Tokenizer {
         }
       }
       if (!matched) {
-        throw new Error(`Unexpected token: ${this.input[0]}`);
+        return ErrorManager.throw(
+          new Error(`Unexpected token: ${this.input[0]}`),
+          { start, end: start, line, column }
+        );
       }
     }
     return tokens;
