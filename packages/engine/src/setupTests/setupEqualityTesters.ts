@@ -2,7 +2,7 @@ import { expect } from '@jest/globals';
 
 import { isEqual } from 'lodash';
 
-import { AbstractLogEntry } from '../src/logger/entry/abstract';
+import { AbstractLogEntry } from '../logger/entry/abstract';
 
 export function areAbstractLogEntriesEqual(
   a: AbstractLogEntry<unknown>,

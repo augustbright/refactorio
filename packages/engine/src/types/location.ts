@@ -4,3 +4,5 @@ export type TLocation = {
   line: number;
   column: number;
 };
+
+export type TLocationExtract = [string, string, string];

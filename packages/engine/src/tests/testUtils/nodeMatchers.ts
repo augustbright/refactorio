@@ -13,7 +13,6 @@ import {
   TMemberExpression,
   TNodeWithType,
   TObjectLiteral,
-  TProgram,
   TReplaceStatement,
   TSelectorPattern,
   TVariableDeclaration
@@ -25,7 +24,7 @@ type TNodeMatcherParameters<T extends TCommonNode['type']> = Partial<
 
 const expectNode = <T extends TCommonNode['type']>(
   type: T,
-  properties: TNodeMatcherParameters<T>
+  properties: TNodeMatcherParameters<T> = {}
 ) =>
   expect.objectContaining({
     type,
@@ -34,7 +33,9 @@ const expectNode = <T extends TCommonNode['type']>(
   });
 
 const nodeMatchers = {
-  expectProgram: (body: TProgram['body']) => expectNode('Program', { body }),
+  expectNode,
+  expectProgram: (body: TNodeMatcherParameters<'Program'>['body']) =>
+    expectNode('Program', { body }),
   expectVariableDeclaration: (
     name: TVariableDeclaration['name'],
     value: TVariableDeclaration['value']
@@ -87,6 +88,6 @@ const nodeMatchers = {
     nodeType: TSelectorPattern['nodeType'],
     filter?: TSelectorPattern['filter']
   ) => expectNode('SelectorPattern', { nodeType, filter })
-} satisfies Record<`expect${TCommonNode['type']}`, unknown>;
+} satisfies Record<`expect${TCommonNode['type']}` | `expectNode`, unknown>;
 
 export = nodeMatchers;

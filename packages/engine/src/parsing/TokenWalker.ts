@@ -1,6 +1,6 @@
 import { ErrorManager } from 'src/errors';
 import { TToken, TTokenType, Tokenizer } from 'src/tokens';
-import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
+import { EMPTY_LOCATION } from 'src/utils/location/emptyLocation';
 
 const ensureArray = <T>(value: T | T[]): T[] =>
   Array.isArray(value) ? value : [value];

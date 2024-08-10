@@ -6,7 +6,7 @@ import { BINARY_EXPRESSION_OPERATORS_TOKEN_TYPES } from 'src/tokens/TOKEN_TYPES'
 import { TBinaryExpressionOperatorTokenType, TToken } from 'src/tokens/types';
 import { TExpression } from 'src/types';
 import { UnreachableCaseError } from 'src/utils/UnreachableCaseError';
-import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
+import { EMPTY_LOCATION } from 'src/utils/location/emptyLocation';
 
 export function parseExpression(walker: TokenWalker): TExpression {
   const left = parseMemberExpression(walker);

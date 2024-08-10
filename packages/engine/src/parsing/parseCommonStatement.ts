@@ -5,7 +5,7 @@ import { parseStatement } from './parseStatement';
 
 import { ErrorManager } from 'src/errors';
 import { TStatement } from 'src/types';
-import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
+import { EMPTY_LOCATION } from 'src/utils/location/emptyLocation';
 
 export function parseCommonStatement(walker: TokenWalker): TStatement {
   const commonStatement = walker.current;

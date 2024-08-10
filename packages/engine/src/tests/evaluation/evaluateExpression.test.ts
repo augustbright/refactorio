@@ -1,72 +1,35 @@
-import { testContext, testIterate } from '../testUtils';
+import { testIterate } from '../testUtils';
 
 describe('evaluateExpression', () => {
   test('literal', () => {
-    const iterator = testIterate.expression(testContext({}), '42');
-    expect(iterator.next()).toEqual({
-      value: 42,
-      done: true
-    });
+    const { iterator } = testIterate.expression`42`;
+    expect(iterator.next()).toBeDone().toHaveValue(42);
   });
   test('identifier', () => {
-    const iterator = testIterate.expression(
-      testContext({ foo: { value: 42 } }),
-      'foo'
-    );
-    expect(iterator.next()).toEqual({
-      value: 42,
-      done: true
-    });
+    const { iterator, context } = testIterate.expression`foo`;
+    context.foo = 42;
+    expect(iterator.next()).toBeDone().toHaveValue(42);
   });
   test('binary expression', () => {
-    const iterator = testIterate.expression(
-      testContext({
-        foo: { value: 42 },
-        bar: { value: 8 }
-      }),
-      'foo + bar'
-    );
+    const { iterator, context } = testIterate.expression`foo + bar`;
+    context.foo = 10;
+    context.bar = 40;
 
-    expect(iterator.next()).toEqual({
-      value: 50,
-      done: true
-    });
+    expect(iterator.next()).toBeDone().toHaveValue(50);
   });
   test('member expression', () => {
-    const iterator = testIterate.expression(
-      testContext({
-        foo: {
-          value: {
-            bar: 42
-          }
-        }
-      }),
-      'foo.bar'
-    );
-    expect(iterator.next()).toEqual({
-      value: 42,
-      done: true
-    });
+    const { iterator, context } = testIterate.expression`foo.bar`;
+    context.foo = { bar: 42 };
+    expect(iterator.next()).toBeDone().toHaveValue(42);
   });
   test('call expression', () => {
-    const iterator = testIterate.expression(
-      testContext({
-        foo: {
-          value: (a: number, b: number) => a + b
-        }
-      }),
-      'foo(1, 2)'
-    );
-    expect(iterator.next()).toEqual({
-      value: 3,
-      done: true
-    });
+    const { iterator, context } = testIterate.expression`foo(1, 2)`;
+    context.foo = (a: number, b: number) => a + b;
+
+    expect(iterator.next()).toBeDone().toHaveValue(3);
   });
   test('object literal', () => {
-    const iterator = testIterate.expression(testContext({}), '{ foo: 42 }');
-    expect(iterator.next()).toEqual({
-      value: { foo: 42 },
-      done: true
-    });
+    const { iterator } = testIterate.expression`{ foo: 42 }`;
+    expect(iterator.next()).toBeDone().toHaveValue({ foo: 42 });
   });
 });

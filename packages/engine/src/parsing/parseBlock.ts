@@ -3,7 +3,7 @@ import { parseCommonStatement } from './parseCommonStatement';
 
 import { ErrorManager } from 'src/errors';
 import { TBlock } from 'src/types';
-import { EMPTY_LOCATION } from 'src/utils/emptyLocation';
+import { EMPTY_LOCATION } from 'src/utils/location/emptyLocation';
 
 export function parseBlock(
   walker: TokenWalker,

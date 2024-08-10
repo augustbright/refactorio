@@ -21,6 +21,8 @@ export class Tokenizer {
         if (match) {
           switch (tokenType.type) {
             case 'COMMENT':
+              column += match[0].length;
+              start += match[0].length;
               break;
             case 'NEWLINE':
               tokens.push({
@@ -43,9 +45,10 @@ export class Tokenizer {
                   loc: { start, end: start + match[0].length, line, column }
                 });
                 lineStart = false;
-                column += match[0].length;
-                start += match[0].length;
               }
+              column += match[0].length;
+              start += match[0].length;
+
               break;
             case 'DOT':
               tokens.push({

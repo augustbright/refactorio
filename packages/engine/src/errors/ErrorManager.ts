@@ -1,11 +1,6 @@
-import { TLocation } from 'src/types';
+import { LocatedError } from './LocatedError';
 
-class LocatedError<E extends Error> {
-  constructor(
-    public error: E,
-    public loc: TLocation
-  ) {}
-}
+import { TLocation } from 'src/types';
 
 export class ErrorManager {
   private constructor() {}

@@ -4,6 +4,7 @@ import {
   createEvaluationContext,
   setDebugging
 } from 'src/evaluation/evaluationContext';
+import { preprocessInput } from 'src/tokens/preprocessInput';
 
 export * from './asyncMatchers';
 export * from './testIterate';
@@ -22,3 +23,6 @@ export const testContext = (
     parent: debuggingContext
   });
 };
+
+export const fix = (...args: Parameters<typeof String.raw>): string =>
+  preprocessInput(String.raw(...args));
