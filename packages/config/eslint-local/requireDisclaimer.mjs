@@ -1,5 +1,11 @@
 /**@type import('eslint').Rule.RuleModule */
-export const requireSpecialHeader = {
+/** ================================================================================================== **
+ ** REFACTORIO                                                                                         **
+ **  @Author Valerii Bubenshchikov, 2024                                                               **
+ **  @License MIT                                                                                      **
+ **  @Description This file is part of the Refactorio project, a tool for automatic code refactoring.  **
+ ** ================================================================================================== */
+export const requireDisclaimer = {
   meta: {
     type: 'suggestion',
     docs: {
@@ -26,37 +32,46 @@ export const requireSpecialHeader = {
   create: function (context) {
     return {
       Program: function (node) {
-        // get disclaimer body and boundary string from options
         const options = context.options[0];
         const disclaimer = options.disclaimer;
         const boundary = options.boundary;
-
-        // get all the comments from node.comments;
-        // check if the disclaimer comment exists among all comments
-        //  if the disclaimer is found, check if it matches the expected disclaimer
-        //    if it matches, do nothing
-        //    if it doesn't match, report an error
-        //  if the disclaimer is not found, report an error
-
         const comments = node.comments;
 
-        const formattedDisclaimer = () =>
-          disclaimer
-            .split('\n')
-            .map((line) => ` * ${line}`)
-            .join('\n');
-        const expectedDisclaimerComment = [
-          `/* ${boundary}`,
-          formattedDisclaimer(),
-          `   ${boundary} */`
-        ].join('\n');
+        const stretchLine = (line, width) =>
+          `${line}${Array(width - line.length)
+            .fill(' ')
+            .join('')}`;
+
+        const formattedDisclaimer = () => {
+          const lines = disclaimer.split('\n');
+          const disclaimerWidth = [boundary, lines]
+            .flat()
+            .reduce((max, line) => (line.length > max ? line.length : max), 0);
+
+          return {
+            text: lines
+              .map((line) => {
+                return ` ** ${stretchLine(line, disclaimerWidth)} **`;
+              })
+              .join('\n'),
+            width: disclaimerWidth
+          };
+        };
+        const expectedDisclaimerComment = () => {
+          const { text, width } = formattedDisclaimer();
+          return [
+            `/** ${stretchLine(boundary, width)} **`,
+            text,
+            ` ** ${stretchLine(boundary, width)} */`
+          ].join('\n');
+        };
 
         /**@type import('eslint').Rule.ReportFixer*/
         const missingCommentFixer = (fixer) => {
           const sourceCode = context.sourceCode;
           const text = sourceCode.getText(node);
           const newCode = [
-            expectedDisclaimerComment,
+            expectedDisclaimerComment(),
             text.match(/^\s*(?<code>\S.*)$/)?.groups?.code || text
           ].join('\n');
           return fixer.replaceText(node, newCode);
@@ -71,9 +86,7 @@ export const requireSpecialHeader = {
         }
         const isDisclaimer = (text) => {
           const lines = text.split('\n');
-          return (
-            lines[0].trim() === boundary && lines.at(-1).trim() === boundary
-          );
+          return lines[0].includes(boundary) && lines.at(-1).includes(boundary);
         };
         const disclaimerComments = comments.filter((comment) =>
           isDisclaimer(comment.value)
@@ -107,7 +120,9 @@ export const requireSpecialHeader = {
           return (
             actualLines.length === expectedLines.length &&
             actualLines.every(
-              (line, index) => line === ` * ${expectedLines[index]}`
+              (line, index) =>
+                line.replace(/(^ \*\* )/, '').replace(/(\s*\*\*$)/, '') ===
+                expectedLines[index]
             )
           );
         };
@@ -121,7 +136,7 @@ export const requireSpecialHeader = {
                 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
                 // @ts-ignore
                 disclaimerComment.range,
-                expectedDisclaimerComment
+                expectedDisclaimerComment()
               );
             }
           });

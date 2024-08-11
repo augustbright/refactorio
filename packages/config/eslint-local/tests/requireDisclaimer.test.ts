@@ -1,19 +1,29 @@
+/** ================================================================================================== **
+ ** REFACTORIO                                                                                         **
+ **  @Author Valerii Bubenshchikov, 2024                                                               **
+ **  @License MIT                                                                                      **
+ **  @Description This file is part of the Refactorio project, a tool for automatic code refactoring.  **
+ ** ================================================================================================== */
 'use strict';
 
 import { RuleTester } from 'eslint';
 
-import { requireSpecialHeader } from '../requireSpecialHeader';
+import { requireDisclaimer } from '../requireDisclaimer';
+
+
 
 const ruleTester = new RuleTester();
 
-describe('requireSpecialHeader', () => {
-  ruleTester.run('requireSpecialHeader', requireSpecialHeader, {
+describe('requireDisclaimer', () => {
+  const expectedDisclaimer = `/** DISCLAIMER          **
+ ** This is a test file **
+ ** DISCLAIMER          */`;
+
+  ruleTester.run('requireDisclaimer', requireDisclaimer, {
     valid: [
       {
         code: `
-/* DISCLAIMER 
- * This is a test file
-   DISCLAIMER */
+${expectedDisclaimer}
 
           print('Hello, world!')
           `,
@@ -38,19 +48,13 @@ print('Hello, world!')`,
           }
         ],
         output: `
-/* DISCLAIMER
- * This is a test file
-   DISCLAIMER */
+${expectedDisclaimer}
 print('Hello, world!')`
       },
       {
-        code: `/* DISCLAIMER
- * This is a test file
-   DISCLAIMER */
+        code: `${expectedDisclaimer}
 
-/* DISCLAIMER
- * This is a test file
-   DISCLAIMER */
+${expectedDisclaimer}
 
 print('Hello, world!')`,
         errors: [{ message: 'Multiple disclaimer comments found.' }],
@@ -60,9 +64,7 @@ print('Hello, world!')`,
             disclaimer: 'This is a test file'
           }
         ],
-        output: `/* DISCLAIMER
- * This is a test file
-   DISCLAIMER */
+        output: `${expectedDisclaimer}
 
 
 
@@ -70,9 +72,9 @@ print('Hello, world!')`
       },
       {
         code: `
-/* DISCLAIMER
- * Wrong disclaimer
-   DISCLAIMER */
+/** DISCLAIMER          **
+ ** This is WRONG       **
+ ** DISCLAIMER          */
 
 print('Hello, world!')`,
         errors: [
@@ -85,9 +87,7 @@ print('Hello, world!')`,
           }
         ],
         output: `
-/* DISCLAIMER
- * This is a test file
-   DISCLAIMER */
+${expectedDisclaimer}
 
 print('Hello, world!')`
       }
