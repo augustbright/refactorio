@@ -1,16 +1,8 @@
-/** ================================================================================================== **
- ** REFACTORIO                                                                                         **
- **  @Author Valerii Bubenshchikov, 2024                                                               **
- **  @License MIT                                                                                      **
- **  @Description This file is part of the Refactorio project, a tool for automatic code refactoring.  **
- ** ================================================================================================== */
 'use strict';
 
 import { RuleTester } from 'eslint';
 
 import { requireDisclaimer } from '../requireDisclaimer';
-
-
 
 const ruleTester = new RuleTester();
 

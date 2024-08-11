@@ -1,15 +1,10 @@
-/** ================================================================================================== **
- ** REFACTORIO                                                                                         **
- **  @Author Valerii Bubenshchikov, 2024                                                               **
- **  @License MIT                                                                                      **
- **  @Description This file is part of the Refactorio project, a tool for automatic code refactoring.  **
- ** ================================================================================================== */
 import pluginJs from '@eslint/js';
 
 import jestExtended from 'eslint-plugin-jest-extended';
+import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
-import tseslint from 'typescript-eslint';
+import tsEslint from 'typescript-eslint';
 
 import disclaimer from './disclaimer.mjs';
 import local from './eslint-local/index.mjs';
@@ -36,8 +31,8 @@ export default [
     }
   },
   pluginJs.configs.recommended,
-  ...tseslint.configs.recommended,
-  //eslintPluginPrettierRecommended,
+  ...tsEslint.configs.recommended,
+  eslintPluginPrettierRecommended,
   {
     plugins: {
       'unused-imports': unusedImports

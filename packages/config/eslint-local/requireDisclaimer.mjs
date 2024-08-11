@@ -1,10 +1,4 @@
 /**@type import('eslint').Rule.RuleModule */
-/** ================================================================================================== **
- ** REFACTORIO                                                                                         **
- **  @Author Valerii Bubenshchikov, 2024                                                               **
- **  @License MIT                                                                                      **
- **  @Description This file is part of the Refactorio project, a tool for automatic code refactoring.  **
- ** ================================================================================================== */
 export const requireDisclaimer = {
   meta: {
     type: 'suggestion',
