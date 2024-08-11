@@ -14,7 +14,6 @@ export default [
   {
     files: ['**/*.{js,mjs,cjs,ts,json}']
   },
-  { languageOptions: { globals: globals.node } },
   {
     plugins: { local },
     rules: {
@@ -29,8 +28,33 @@ export default [
     }
   },
   pluginJs.configs.recommended,
-  ...tsEslint.configs.recommended,
-  ...tsEslint.configs.stylistic,
+
+  // Typed linting
+  ...tsEslint.configs.recommendedTypeChecked,
+  ...tsEslint.configs.stylisticTypeChecked,
+  {
+    languageOptions: {
+      globals: globals.node,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+        project: ['../*/tsconfig.json']
+      }
+    }
+  },
+  {
+    files: [
+      '**/*.js',
+      '**/*.mjs',
+      '**/*.cjs',
+      '**/*.json',
+      '*',
+      '**/*.test.ts',
+      'eslint-local/**/*'
+    ],
+    ...tsEslint.configs.disableTypeChecked
+  },
+
   eslintPluginPrettierRecommended,
   {
     plugins: {

@@ -24,7 +24,7 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
     if (!name) {
       return ErrorManager.throw(
         new SyntaxError('Expected variable name'),
-        walker.currentLoc || EMPTY_LOCATION
+        walker.currentLoc ?? EMPTY_LOCATION
       );
     }
     walker.step();
@@ -57,7 +57,7 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
     if (!alias) {
       return ErrorManager.throw(
         new SyntaxError('Expected alias name'),
-        walker.currentLoc || EMPTY_LOCATION
+        walker.currentLoc ?? EMPTY_LOCATION
       );
     }
     walker.step();
@@ -105,7 +105,7 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
         start: commonStatement.loc.start,
         column: commonStatement.loc.column,
         line: commonStatement.loc.line,
-        end: orStatement?.loc.end || andStatement?.loc.end || newValue.loc.end
+        end: orStatement?.loc.end ?? andStatement?.loc.end ?? newValue.loc.end
       }
     };
   }
@@ -129,7 +129,7 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
         start: commonStatement.loc.start,
         column: commonStatement.loc.column,
         line: commonStatement.loc.line,
-        end: elseStatement?.loc.end || statement.loc.end
+        end: elseStatement?.loc.end ?? statement.loc.end
       }
     };
   }
@@ -139,7 +139,7 @@ export function parseCommonStatement(walker: TokenWalker): TStatement {
       // throw new SyntaxError('Expected variable name');
       return ErrorManager.throw(
         new SyntaxError('Expected variable name'),
-        walker.currentLoc || EMPTY_LOCATION
+        walker.currentLoc ?? EMPTY_LOCATION
       );
     }
     walker.step(2);

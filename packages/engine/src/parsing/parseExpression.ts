@@ -94,7 +94,7 @@ function parseMemberExpression(walker: TokenWalker) {
       if (!property) {
         return ErrorManager.throw(
           new SyntaxError('Expected property name'),
-          walker.currentLoc || EMPTY_LOCATION
+          walker.currentLoc ?? EMPTY_LOCATION
         );
       }
       walker.step();
@@ -138,7 +138,7 @@ function parsePrimaryExpression(walker: TokenWalker): TExpression {
   if (!token) {
     return ErrorManager.throw(
       new SyntaxError('Unexpected end of input'),
-      walker.currentLoc || EMPTY_LOCATION
+      walker.currentLoc ?? EMPTY_LOCATION
     );
   }
 

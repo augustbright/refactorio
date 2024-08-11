@@ -7,7 +7,7 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand(
       'refactorio.evaluateScript',
       (program: TProgram /*, _token: vscode.CancellationToken */) => {
-        vscode.window.showInformationMessage(
+        void vscode.window.showInformationMessage(
           `Evaluating script: ${JSON.stringify(program, null, 3)}`
         );
         // Add your evaluation logic here

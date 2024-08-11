@@ -50,7 +50,7 @@ export class Logger {
     this.finishTime(label);
   }
 
-  private push(_entry: AbstractLogEntry): void {
+  private push(_entry: AbstractLogEntry) {
     // TODO implement
   }
 

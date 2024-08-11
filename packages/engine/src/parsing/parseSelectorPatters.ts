@@ -38,7 +38,7 @@ function parseSelectorPattern(walker: TokenWalker): TSelectorPattern {
       start: word.loc.start,
       column: word.loc.column,
       line: word.loc.line,
-      end: (filter && filter[filter.length - 1].loc.end) || word.loc.end
+      end: filter?.[filter.length - 1].loc.end ?? word.loc.end
     }
   };
 }

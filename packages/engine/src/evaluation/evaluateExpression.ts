@@ -64,7 +64,7 @@ function* evaluateBinaryExpression(
   const throwCannotApply = (operator: string, left: unknown, right: unknown) =>
     ErrorManager.throw(
       new Error(
-        `Cannot apply operator ${operator} on values ${left} and ${right}`
+        `Cannot apply operator ${operator} on values ${JSON.stringify(left)} and ${JSON.stringify(right)}`
       ),
       expression.loc
     );
@@ -138,7 +138,7 @@ function* member(
     return (object as Record<string, unknown>)[property];
   }
   ErrorManager.throw(
-    new Error(`Cannot get property of ${object}`),
+    new Error(`Cannot get property of ${JSON.stringify(object)}`),
     expression.loc
   );
 }
@@ -154,7 +154,7 @@ function* call(
     for (const arg of args) {
       evaluatedArgs.push(yield* evaluateExpression(context, arg));
     }
-    return func.call(null, ...evaluatedArgs);
+    return func.call(null, ...evaluatedArgs) as unknown;
   }
   ErrorManager.throw(new Error(`Expression is not callable`), expression.loc);
 }

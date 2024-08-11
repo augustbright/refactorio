@@ -92,9 +92,11 @@ export const prettyText = (node: TCommonNode, level: number): string => {
     case 'ObjectLiteral':
       return (
         `{` +
-        Object.entries(node.map).map(
-          ([key, expression]) => `${key}: ${prettyText(expression, level)}`
-        ) +
+        Object.entries(node.map)
+          .map(
+            ([key, expression]) => `${key}: ${prettyText(expression, level)}`
+          )
+          .join(',\n') +
         `}`
       );
     case 'Breakpoint':

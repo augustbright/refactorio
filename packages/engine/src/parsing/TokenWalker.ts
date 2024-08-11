@@ -64,11 +64,11 @@ export class TokenWalker {
       // throw new SyntaxError(`${errorMessage}, got: "${this.current?.value}"`);
       return ErrorManager.throw(
         new SyntaxError(`${errorMessage}, got: "${this.current?.value}"`),
-        this.currentLoc || EMPTY_LOCATION
+        this.currentLoc ?? EMPTY_LOCATION
       );
     }
 
-    return this.current as TToken;
+    return this.current!;
   }
 
   get current(): TToken | undefined {

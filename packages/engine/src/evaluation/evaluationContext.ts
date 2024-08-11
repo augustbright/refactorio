@@ -17,7 +17,7 @@ export const createEvaluationContext = (
   properties: PropertyDescriptorMap,
   options?: TContextOptions
 ): TEvaluationContext => {
-  const context = Object.create(null);
+  const context = Object.create(null) as TEvaluationContext;
   Object.defineProperties(context, properties);
   if (options?.parent) {
     Object.setPrototypeOf(context, options.parent);
@@ -86,7 +86,12 @@ export const updateValue = <T>(
   const ownDescriptor = Object.getOwnPropertyDescriptor(context, key);
   if (!ownDescriptor) {
     if (Object.getPrototypeOf(context)) {
-      return updateValue(Object.getPrototypeOf(context), key, value, loc);
+      return updateValue(
+        Object.getPrototypeOf(context) as TEvaluationContext,
+        key,
+        value,
+        loc
+      );
     } else {
       return ErrorManager.throw(
         new ReferenceError(`'${key}' is not defined`),

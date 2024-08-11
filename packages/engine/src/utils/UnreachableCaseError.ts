@@ -1,5 +1,5 @@
 export class UnreachableCaseError extends Error {
   constructor(value: never) {
-    super(`Unreachable case: ${value}`);
+    super(`Unreachable case: ${JSON.stringify(value)}`);
   }
 }
