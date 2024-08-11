@@ -2,92 +2,93 @@ import { TLocation } from './location';
 
 import { TBinaryExpressionOperatorTokenType } from 'src/tokens/types';
 
-export interface TNode {
+export type TNode = {
   type: string;
   loc: TLocation;
-}
+};
 
-export interface TVariableDeclaration extends TNode {
+export type TVariableDeclaration = {
   type: 'VariableDeclaration';
   name: string;
   value: TExpression;
-}
+} & TNode;
 
-export interface TAssignment extends TNode {
+export type TAssignment = {
   type: 'Assignment';
   name: string;
   value: TExpression;
-}
+} & TNode;
 
-export interface TInStatement extends TNode {
+export type TInStatement = {
   type: 'InStatement';
   selector: TSelectorPattern[];
   alias: string;
   statement: TStatement;
-}
-export interface TReplaceStatement extends TNode {
+} & TNode;
+
+export type TReplaceStatement = {
   type: 'ReplaceStatement';
   selector: TSelectorPattern[];
   newValue: TExpression;
   andStatement?: TStatement;
   orStatement?: TStatement;
-}
+} & TNode;
 
-export interface TIfStatement extends TNode {
+export type TIfStatement = {
   type: 'IfStatement';
   condition: TExpression;
   statement: TStatement;
   elseStatement?: TStatement;
-}
+} & TNode;
 
-export interface TIdentifier extends TNode {
+export type TIdentifier = {
   type: 'Identifier';
   name: string;
-}
+} & TNode;
 
-export interface TLiteral extends TNode {
+export type TLiteral = {
   type: 'Literal';
   value: string | number | boolean;
-}
+} & TNode;
 
-export interface TObjectLiteral extends TNode {
+export type TObjectLiteral = {
   type: 'ObjectLiteral';
   map: Record<string, TExpression>;
-}
+} & TNode;
 
-export interface TBinaryExpression extends TNode {
+export type TBinaryExpression = {
   type: 'BinaryExpression';
   operator: TBinaryExpressionOperatorTokenType;
   left: TExpression;
   right: TExpression;
-}
+} & TNode;
 
-export interface TCallExpression extends TNode {
+export type TCallExpression = {
   type: 'CallExpression';
   callee: TExpression;
   arguments: TExpression[];
-}
+} & TNode;
 
-export interface TSelectorPattern extends TNode {
+export type TSelectorPattern = {
   type: 'SelectorPattern';
   nodeType: string;
   filter?: TExpression[];
-}
+} & TNode;
 
-export interface TMemberExpression extends TNode {
+export type TMemberExpression = {
   type: 'MemberExpression';
   object: TExpression;
   property: string;
-}
+} & TNode;
 
-export interface TBlock extends TNode {
+export type TBlock = {
   type: 'Block';
   body: TStatement[];
-}
+} & TNode;
 
-export interface TBreakpoint extends TNode {
+export type TBreakpoint = {
   type: 'Breakpoint';
-}
+} & TNode;
 
 export type TStatement =
   | TVariableDeclaration
@@ -107,10 +108,10 @@ export type TExpression =
   | TMemberExpression
   | TCallExpression;
 
-export interface TProgram extends TNode {
+export type TProgram = {
   type: 'Program';
   body: TStatement[];
-}
+} & TNode;
 
 export type TCommonNode =
   | TProgram

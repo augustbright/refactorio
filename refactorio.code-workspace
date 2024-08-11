@@ -48,6 +48,9 @@
                 "color": "#3730A3", // Indigo 800
             },
         ],
+        "search.exclude": {
+            "**/dist": true,
+        },
         "workbench.colorCustomizations": {
             "tab.activeBorder": "#3730A3",
             "statusBar.background": "#3730A3",

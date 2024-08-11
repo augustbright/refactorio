@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/consistent-type-definitions */
+
 import 'jest-extended';
 import { type TNodeExpectation } from './tests/testUtils/types';
 declare global {

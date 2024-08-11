@@ -1,9 +1,3 @@
-/** ================================================================================================== **
- ** REFACTORIO                                                                                         **
- **  @Author Valerii Bubenshchikov, 2024                                                               **
- **  @License MIT                                                                                      **
- **  @Description This file is part of the Refactorio project, a tool for automatic code refactoring.  **
- ** ================================================================================================== */
 import { TDirPayload, TErrorPayload, TMessagePayload } from './entry';
 import { AbstractLogEntry } from './entry/abstract';
 import {
@@ -15,9 +9,9 @@ import {
   LogEntry,
   WarnEntry
 } from './entry/implementations';
-import { ILogging, TTimingBreakpoints } from './types';
+import { TTimingBreakpoints } from './types';
 
-export class Logger implements ILogging {
+export class Logger {
   debug(message: TMessagePayload): void {
     this.push(new DebugEntry(message));
   }
@@ -56,7 +50,9 @@ export class Logger implements ILogging {
     this.finishTime(label);
   }
 
-  private push(_entry: AbstractLogEntry): void {}
+  private push(_entry: AbstractLogEntry): void {
+    // TODO implement
+  }
 
   private startTime(label: string, breakpoints: TTimingBreakpoints): void {
     label;

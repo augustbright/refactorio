@@ -5,9 +5,7 @@ import { TCommonNode, TProgram } from 'src/types';
 
 export type TParser = RecastOptions['parser'];
 export type TEvaluationContext = Tagged<
-  {
-    [key: string | symbol]: unknown;
-  },
+  Record<string | symbol, unknown>,
   'evaluation context'
 >;
 export type TScriptDefinition = TProgram | string;

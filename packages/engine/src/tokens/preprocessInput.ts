@@ -7,14 +7,14 @@ export function preprocessInput(code: string): string {
     /^(?<emptyStart>\s*\n)?(?<baseIndentation>\s*)(?<codeContent>\S(\s|\S)*?)(?<emptyEnd>\s*)$/
   );
   if (!match) {
-    ErrorManager.throw(
+    return ErrorManager.throw(
       new SyntaxError('Failed to parse the input'),
       EMPTY_LOCATION
     );
   }
   const { groups } = match;
   if (!groups) {
-    ErrorManager.throw(
+    return ErrorManager.throw(
       new SyntaxError('Failed to parse the input'),
       EMPTY_LOCATION
     );
