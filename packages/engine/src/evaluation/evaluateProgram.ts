@@ -12,5 +12,6 @@ export function* evaluateProgram(
     yield* step(context, statement, evaluateStatement(context, statement));
   }
 
+  // eslint-disable-next-line sonarjs/no-redundant-jump
   return;
 }

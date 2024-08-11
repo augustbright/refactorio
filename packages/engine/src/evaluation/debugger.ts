@@ -43,11 +43,9 @@ function* stepOver(
     if (value.step) {
       continue;
     }
-    if (value.breakpoint) {
-      if (isDebugging(context)) {
-        setSuspended(context, true);
-        return yield* step(context, node, evaluator);
-      }
+    if (value.breakpoint && isDebugging(context)) {
+      setSuspended(context, true);
+      return yield* step(context, node, evaluator);
     }
   }
 }

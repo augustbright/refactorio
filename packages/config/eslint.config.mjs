@@ -2,6 +2,7 @@ import pluginJs from '@eslint/js';
 
 import jestExtended from 'eslint-plugin-jest-extended';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
+import sonarjs from 'eslint-plugin-sonarjs';
 import unusedImports from 'eslint-plugin-unused-imports';
 import globals from 'globals';
 import tsEslint from 'typescript-eslint';
@@ -76,6 +77,7 @@ export default [
       ]
     }
   },
+  sonarjs.configs.recommended,
   jestExtended.configs['flat/all'],
 
   {

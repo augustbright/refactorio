@@ -11,6 +11,11 @@ describe('requireDisclaimer', () => {
  ** This is a test file **
  ** DISCLAIMER          */`;
 
+  const ruleOptions = {
+    boundary: 'DISCLAIMER',
+    disclaimer: 'This is a test file'
+  };
+
   ruleTester.run('requireDisclaimer', requireDisclaimer, {
     valid: [
       {
@@ -19,12 +24,7 @@ ${expectedDisclaimer}
 
           print('Hello, world!')
           `,
-        options: [
-          {
-            boundary: 'DISCLAIMER',
-            disclaimer: 'This is a test file'
-          }
-        ]
+        options: [ruleOptions]
       }
     ],
 
@@ -33,12 +33,7 @@ ${expectedDisclaimer}
         code: `
 print('Hello, world!')`,
         errors: [{ message: 'Missing the disclaimer comment.' }],
-        options: [
-          {
-            boundary: 'DISCLAIMER',
-            disclaimer: 'This is a test file'
-          }
-        ],
+        options: [ruleOptions],
         output: `
 ${expectedDisclaimer}
 print('Hello, world!')`
@@ -50,12 +45,7 @@ ${expectedDisclaimer}
 
 print('Hello, world!')`,
         errors: [{ message: 'Multiple disclaimer comments found.' }],
-        options: [
-          {
-            boundary: 'DISCLAIMER',
-            disclaimer: 'This is a test file'
-          }
-        ],
+        options: [ruleOptions],
         output: `${expectedDisclaimer}
 
 
@@ -72,12 +62,7 @@ print('Hello, world!')`,
         errors: [
           { message: 'The disclaimer comment does not match the expected.' }
         ],
-        options: [
-          {
-            boundary: 'DISCLAIMER',
-            disclaimer: 'This is a test file'
-          }
-        ],
+        options: [ruleOptions],
         output: `
 ${expectedDisclaimer}
 
