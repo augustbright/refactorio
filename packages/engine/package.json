@@ -28,6 +28,7 @@
   },
   "dependencies": {
     "@types/lodash": "^4.17.7",
+    "dotenv": "^16.4.5",
     "glob": "^11.0.0",
     "lodash": "^4.17.21",
     "recast": "^0.23.9",

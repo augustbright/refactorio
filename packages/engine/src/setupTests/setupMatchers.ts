@@ -16,12 +16,16 @@ const toSuspendOn: MatcherFunction<[TNodeExpectation]> = function (
     })
   ) {
     return {
-      message: () => `expected iterator result not to suspend on node`,
+      message: () =>
+        `expected iterator result not to suspend on node ${this.utils.printExpected(expected)}
+        but received ${this.utils.printReceived(actual)}`,
       pass: true
     };
   } else {
     return {
-      message: () => `expected iterator result to suspend on node`,
+      message:
+        () => `expected iterator result to suspend on node ${this.utils.printExpected(expected)}
+      but received ${this.utils.printReceived(actual)}`,
       pass: false
     };
   }
@@ -37,7 +41,8 @@ const toBeDone: MatcherFunction<[]> = function (actual) {
   } else {
     return {
       message: () =>
-        `expected iterator result to be done, but received not done`,
+        `expected iterator result to be done, but received not done,
+        with value ${this.utils.printReceived(actual)}`,
       pass: false
     };
   }
