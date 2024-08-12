@@ -2,6 +2,7 @@ import { TEvaluationContext } from './types';
 
 import { ErrorManager } from 'src/errors';
 import { TLocation } from 'src/types';
+import { EMPTY_LOCATION } from 'src/utils/location/emptyLocation';
 
 export type TContextOptions = {
   freeze?: boolean;
@@ -73,7 +74,7 @@ export const declare = (
 
 export const updateValue = <T>(
   context: TEvaluationContext,
-  key: string,
+  key: string | symbol,
   value: T,
   loc: TLocation
 ): T => {
@@ -94,14 +95,14 @@ export const updateValue = <T>(
       );
     } else {
       return ErrorManager.throw(
-        new ReferenceError(`'${key}' is not defined`),
+        new ReferenceError(`'${String(key)}' is not defined`),
         loc
       );
     }
   }
   if (!ownDescriptor.writable) {
     return ErrorManager.throw(
-      new TypeError(`Identifier '${key}' is read-only`),
+      new TypeError(`Identifier '${String(key)}' is read-only`),
       loc
     );
   }
@@ -148,9 +149,9 @@ export const isSuspended = (context: TEvaluationContext) => {
 };
 
 export const setDebugging = (context: TEvaluationContext, value: boolean) => {
-  context[DEBUGGING_SYMBOLS.isDebugging] = value;
+  updateValue(context, DEBUGGING_SYMBOLS.isDebugging, value, EMPTY_LOCATION);
 };
 
 export const setSuspended = (context: TEvaluationContext, value: boolean) => {
-  context[DEBUGGING_SYMBOLS.isSuspended] = value;
+  updateValue(context, DEBUGGING_SYMBOLS.isSuspended, value, EMPTY_LOCATION);
 };

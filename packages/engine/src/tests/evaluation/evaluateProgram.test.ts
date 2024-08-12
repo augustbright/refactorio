@@ -1,7 +1,11 @@
 import { testIterate } from '../testUtils';
 import { expectBreakpoint, expectNode } from '../testUtils/nodeMatchers';
 
-import { getValue, isSuspended } from 'src/evaluation/evaluationContext';
+import {
+  getValue,
+  isSuspended,
+  setDebugging
+} from 'src/evaluation/evaluationContext';
 import { EMPTY_LOCATION } from 'src/utils/location/emptyLocation';
 
 const SAMPLE_CODE = `
@@ -42,6 +46,13 @@ describe('evaluateProgram', () => {
     const { iterator, print } = testIterate.program`print('Hello')`;
     expect(iterator.next('run')).toBeDone();
     expect(print).toHaveBeenCalledWith('Hello');
+  });
+
+  test('multiple statements', () => {
+    const { iterator, context, print } = testIterate.program`${SAMPLE_CODE}`;
+    setDebugging(context, false);
+    expect(iterator.next('run')).toBeDone();
+    expect(print).toHaveBeenCalledWith(410, 320);
   });
 
   describe('breakpoints & debugging', () => {
@@ -162,6 +173,34 @@ describe('evaluateProgram', () => {
       );
       expect(iterator.next('step')).toSuspendOn(expectNode('CallExpression'));
       expect(iterator.next('step')).toBeDone();
+      expect(print).toHaveBeenCalledWith(410, 320);
+    });
+    test('run while debugging', () => {
+      const { iterator, print } = testIterate.program`${SAMPLE_CODE}`;
+
+      expect(iterator.next('run')).toSuspendOn(expectBreakpoint());
+      expect(iterator.next('step')).toSuspendOn(expectNode('IfStatement'));
+      expect(iterator.next('step into')).toSuspendOn(
+        expectNode('BinaryExpression')
+      );
+      expect(iterator.next('step')).toSuspendOn(expectNode('Block'));
+      expect(iterator.next('step into')).toSuspendOn(expectNode('Assignment'));
+      expect(iterator.next('step')).toSuspendOn(expectNode('IfStatement'));
+      expect(iterator.next('step into')).toSuspendOn(
+        expectNode('BinaryExpression')
+      );
+      expect(iterator.next('step')).toSuspendOn(expectNode('Block'));
+      expect(iterator.next('step into')).toSuspendOn(expectNode('Assignment'));
+      expect(iterator.next('step')).toSuspendOn(expectNode('Assignment'));
+      expect(iterator.next('step')).toSuspendOn(expectNode('Assignment'));
+      expect(iterator.next('step')).toSuspendOn(expectNode('IfStatement'));
+      expect(iterator.next('step into')).toSuspendOn(
+        expectNode('BinaryExpression')
+      );
+      expect(iterator.next('step')).toSuspendOn(expectNode('Block'));
+      expect(iterator.next('step into')).toSuspendOn(expectNode('Assignment'));
+      expect(iterator.next('step')).toSuspendOn(expectNode('Assignment'));
+      expect(iterator.next('run')).toBeDone();
       expect(print).toHaveBeenCalledWith(410, 320);
     });
   });

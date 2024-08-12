@@ -23,11 +23,11 @@ export function* step(
       return yield* stepOver(context, node, evaluator);
     } else if (response === 'step into') {
       return yield* stepInto(context, node, evaluator);
-      // return yield* evaluator;
     } else if (response === 'step out') {
       yield { stepOut: true };
     } else if (!response || response === 'run') {
       setSuspended(context, false);
+      return yield* evaluator;
     } else {
       return ErrorManager.throw(new UnreachableCaseError(response), node.loc);
     }
@@ -93,16 +93,4 @@ function stepInto(
       return iterator;
     }
   };
-  // return yield* evaluator;
-
-  // while (true) {
-  //   const { value, done } = evaluator.next('step');
-  //   if (done) {
-  //     return value;
-  //   }
-  //   if (value.stepOut) {
-  //     return yield* stepOver(context, node, evaluator);
-  //   }
-  //   yield value;
-  // }
 }
