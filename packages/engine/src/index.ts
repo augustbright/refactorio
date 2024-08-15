@@ -1,2 +1,6 @@
-export { parse } from './parsing';
+import 'module-alias/register';
+
+export * from './tokens';
+export * from './parsing';
 export * from './types';
+export * from './evaluation';

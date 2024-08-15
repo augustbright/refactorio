@@ -1,0 +1,25 @@
+SET value1 = 10
+SET value2 = 20
+SET value3 = 0
+
+BREAKPOINT
+
+IF value1 < value2
+  value1 = value1 + 100
+  IF value1 > value2
+    value2 = value2 + 100
+    value2 = value2 + 100
+    value2 = value2 + 100
+    IF value2 > value1
+      value1 = value1 + 100
+      value1 = value1 + 100
+      value1 = value1 + 100
+    value3 = value3 + 1
+    value3 = value3 + 1
+  ELSE value1 = value1 + 100
+  value3 = value3 + 1
+  value3 = value3 + 1
+ELSE
+  value2 = value2 + 100
+
+print(value1, value2)
