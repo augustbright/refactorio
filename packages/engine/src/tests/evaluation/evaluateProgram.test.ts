@@ -1,5 +1,5 @@
 import { testIterate } from '../testUtils';
-import { expectBreakpoint, expectNode } from '../testUtils/nodeMatchers';
+import { nodeMatchers } from '../testUtils/nodeMatchers';
 
 import {
   getValue,
@@ -7,6 +7,8 @@ import {
   setDebugging
 } from 'src/evaluation/evaluationContext';
 import { EMPTY_LOCATION } from 'src/utils/location/emptyLocation';
+
+const { expectBreakpoint, expectNode } = nodeMatchers;
 
 const SAMPLE_CODE = `
 SET value1 = 10

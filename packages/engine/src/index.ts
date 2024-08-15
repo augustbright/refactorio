@@ -1,5 +1,3 @@
-import 'module-alias/register';
-
 export * from './tokens';
 export * from './parsing';
 export * from './types';

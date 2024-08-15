@@ -35,7 +35,7 @@ const expectNode = <T extends TCommonNode['type']>(
     ...properties
   });
 
-const nodeMatchers = {
+export const nodeMatchers = {
   expectNode,
   expectProgram: (body: TNodeMatcherParameters<'Program'>['body']) =>
     expectNode('Program', { body }),
@@ -92,5 +92,3 @@ const nodeMatchers = {
     filter?: TSelectorPattern['filter']
   ) => expectNode('SelectorPattern', { nodeType, filter })
 } satisfies Record<`expect${TCommonNode['type']}` | `expectNode`, unknown>;
-
-export = nodeMatchers;

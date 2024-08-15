@@ -1,4 +1,9 @@
-import {
+import { nodeMatchers } from './testUtils/nodeMatchers';
+
+import { parse } from 'src/parsing';
+import { prettyText } from 'src/utils/prettyText';
+
+const {
   expectAssignment,
   expectBinaryExpression,
   expectCallExpression,
@@ -12,10 +17,7 @@ import {
   expectReplaceStatement,
   expectSelectorPattern,
   expectVariableDeclaration
-} from './testUtils/nodeMatchers';
-
-import { parse } from 'src/parsing';
-import { prettyText } from 'src/utils/prettyText';
+} = nodeMatchers;
 
 describe('parser', () => {
   test('parses tokens', () => {
