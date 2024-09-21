@@ -5,8 +5,13 @@
       SET value1 = 10
       SET value2 = 20
       SET value3 = 0
+      print('Hello World')
 
       BREAKPOINT
+
+      print('First message')
+      print('Second message')
+
 
       IF value1 < value2
         value1 = value1 + 100
@@ -25,5 +30,7 @@
         value3 = value3 + 1
       ELSE
         value2 = value2 + 100
+
+      print('Almost done')
 
       print(value1, value2)

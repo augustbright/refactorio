@@ -8,7 +8,10 @@ import { AppTabContent } from './AppTabContent.js';
 export const AppTabs = () => {
   const { tabs, activeTabId } = useTabs();
   return (
-    <Box flexDirection='column'>
+    <Box
+      flexDirection='column'
+      alignItems='stretch'
+    >
       <Box
         gap={2}
         borderStyle='single'
@@ -40,6 +43,10 @@ export const AppTabs = () => {
           <Box
             key={tab.id}
             display={tab.id === activeTabId ? 'flex' : 'none'}
+            flexDirection='column'
+            overflowY='hidden'
+            alignItems='stretch'
+            flexGrow={1}
           >
             <AppTabContent tab={tab} />
           </Box>

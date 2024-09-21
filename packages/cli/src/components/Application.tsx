@@ -27,6 +27,7 @@ export const Application = () => {
       height={height}
       width={width}
       borderStyle={'bold'}
+      alignItems='stretch'
     >
       <AppTabs />
       <Spacer />

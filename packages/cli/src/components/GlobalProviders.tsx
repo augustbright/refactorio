@@ -1,4 +1,3 @@
-import { Text } from 'ink';
 import React from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 
@@ -15,7 +14,6 @@ export const GlobalProviders = ({
   programOptions: ProgramOptions;
 }) => (
   <ProgramOptionsContext.Provider value={programOptions}>
-    <Text>{programOptions.defaultDir}</Text>
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
   </ProgramOptionsContext.Provider>
 );

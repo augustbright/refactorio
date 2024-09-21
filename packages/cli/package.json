@@ -2,13 +2,13 @@
   "name": "@refactorio/cli",
   "description": "CLI for Refactorio",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "license": "MIT",
   "type": "module",
   "scripts": {
     "checkTypes": "tsc --noEmit",
     "build": "tsc -p ./ --project tsconfig.build.json",
-    "start": "node ./dist --default-dir ./tests/mocks",
+    "start": "node ./dist/src --default-dir ./tests/mocks",
     "build-and-run": "npm run build && npm run start",
     "test": "jest"
   },
